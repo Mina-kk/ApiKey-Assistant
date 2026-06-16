@@ -8,7 +8,7 @@ function cacheElements() {
     "proxyStatusBar", "proxyStatusText", "proxyLatencyText",
     "searchPanel", "searchInput", "clearSearchBtn",
     "totalConfig", "totalGroups", "totalKeys", "totalModels",
-    "batchBar", "batchSelectAll", "batchCount",
+    "batchBar", "batchSelectAll", "batchCount", "batchGroupSelect", "batchMoveGroupBtn",
     "batchEnableBtn", "batchDisableBtn", "batchFetchModelsBtn", "batchDeleteBtn", "batchCancelBtn",
     "cardsContainer",
     "drawerMask", "drawer", "closeDrawerBtn", "groupList", "manageGroupsBtn",
@@ -40,6 +40,7 @@ function renderAll() {
   AppState.groups = loadGroups();
   renderStats();
   renderDrawerGroups();
+  populateBatchGroupSelect();
   renderCards();
 }
 
@@ -259,11 +260,26 @@ function populateTypeSelect() {
   }).join("");
 }
 
-function populateGroupSelect() {
+function populateGroupSelect(selectedGroup) {
   var sel = AppState.els.groupInput;
+  AppState.groups = loadGroups();
+  var value = selectedGroup || sel.value || "default";
+  if (AppState.groups.indexOf(value) === -1) AppState.groups.push(value);
+  AppState.groups.sort();
   sel.innerHTML = AppState.groups.map(function (g) {
     return '<option value="' + escapeAttr(g) + '">' + escapeHtml(g) + '</option>';
   }).join("");
+  sel.value = value;
+}
+
+function populateBatchGroupSelect() {
+  var sel = AppState.els.batchGroupSelect;
+  if (!sel) return;
+  AppState.groups = loadGroups();
+  sel.innerHTML = AppState.groups.map(function (g) {
+    return '<option value="' + escapeAttr(g) + '">' + escapeHtml(g) + '</option>';
+  }).join("");
+  sel.value = AppState.currentGroup || "default";
 }
 
 function openAddEditor() {
@@ -272,8 +288,7 @@ function openAddEditor() {
     AppState.els.editingId.value = "";
     AppState.els.nameInput.value = "";
     AppState.els.typeInput.value = ChannelType.OpenAI;
-    populateGroupSelect();
-    AppState.els.groupInput.value = AppState.currentGroup || "default";
+    populateGroupSelect(AppState.currentGroup || "default");
     AppState.els.baseUrlInput.value = ChannelBaseURLs[ChannelType.OpenAI];
     AppState.els.priorityInput.value = 0;
     AppState.els.weightInput.value = 0;
@@ -305,7 +320,7 @@ function openEditEditor(ch) {
   AppState.els.editingId.value = ch.id;
   AppState.els.nameInput.value = ch.name || "";
   AppState.els.typeInput.value = ch.type;
-  AppState.els.groupInput.value = ch.group || "default";
+  populateGroupSelect(ch.group || "default");
   AppState.els.baseUrlInput.value = ch.base_url || "";
   AppState.els.priorityInput.value = ch.priority != null ? ch.priority : 0;
   AppState.els.weightInput.value = ch.weight != null ? ch.weight : 0;
@@ -446,6 +461,7 @@ function updateTestModelSelect() {
 
 function renderGroupManageList() {
   var box = AppState.els.groupManageList;
+  AppState.groups = loadGroups();
   box.innerHTML = AppState.groups.map(function (g) {
     var isDefault = g === "default";
     return (

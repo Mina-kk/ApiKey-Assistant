@@ -244,6 +244,17 @@ input, select, textarea { font-size: 16px; }
   gap: 6px;
 }
 
+.batch-actions select {
+  min-width: 96px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 7px 9px;
+  font-size: 12px;
+  outline: none;
+}
+
 /* 卡片容器 */
 .cards-container {
   display: grid;

@@ -42,7 +42,6 @@ function bindEvents() {
     var item = e.target.closest(".group-item");
     if (!item) return;
     AppState.currentGroup = item.dataset.group;
-    els.appBarSubtitle.textContent = AppState.currentGroup ? item.querySelector("span").textContent : "全部渠道";
     closeDrawer();
     renderAll();
   });
@@ -181,6 +180,7 @@ function bindEvents() {
     updateBatchBar();
     renderCards();
   });
+  els.batchMoveGroupBtn.addEventListener("click", batchMoveToGroup);
   els.batchEnableBtn.addEventListener("click", function () { batchSetStatus(1); });
   els.batchDisableBtn.addEventListener("click", function () { batchSetStatus(0); });
   els.batchFetchModelsBtn.addEventListener("click", batchFetchModels);
@@ -205,6 +205,8 @@ function bindEvents() {
 }
 
 function openDrawer() {
+  AppState.groups = loadGroups();
+  renderDrawerGroups();
   AppState.els.drawer.classList.add("active");
   AppState.els.drawerMask.classList.add("active");
 }
@@ -586,6 +588,7 @@ function enableBatchMode() {
   AppState.selectedChannels = {};
   AppState.els.batchBar.classList.add("active");
   AppState.els.addBtn.style.display = "none";
+  populateBatchGroupSelect();
   updateBatchBar();
   renderCards();
 }
@@ -612,6 +615,23 @@ function batchSetStatus(status) {
   saveChannels();
   renderCards();
   showToast(status === 1 ? "已启用" : "已禁用", "success");
+}
+
+function batchMoveToGroup() {
+  var ids = getSelectedIds();
+  if (!ids.length) { showToast("未选择任何渠道", "warning"); return; }
+  var group = AppState.els.batchGroupSelect.value || "default";
+  ensureGroupExists(group);
+  AppState.channels.forEach(function (ch) {
+    if (ids.indexOf(ch.id) !== -1) {
+      ch.group = group;
+      ch.updated_time = Date.now();
+    }
+  });
+  saveChannels();
+  renderAll();
+  updateBatchBar();
+  showToast("已移动到 " + group, "success");
 }
 
 function batchDelete() {
@@ -666,6 +686,8 @@ function addNewGroup() {
   input.value = "";
   renderGroupManageList();
   renderDrawerGroups();
+  populateGroupSelect(name);
+  populateBatchGroupSelect();
 }
 
 function handleGroupManageAction(e) {
@@ -679,6 +701,8 @@ function handleGroupManageAction(e) {
     if (newName && renameGroup(group, newName.trim())) {
       renderGroupManageList();
       renderDrawerGroups();
+      populateGroupSelect(newName.trim());
+      populateBatchGroupSelect();
       renderCards();
       showToast("已重命名", "success");
     }
@@ -689,6 +713,8 @@ function handleGroupManageAction(e) {
       deleteGroup(group);
       renderGroupManageList();
       renderDrawerGroups();
+      populateGroupSelect("default");
+      populateBatchGroupSelect();
       renderCards();
       showToast("已删除", "success");
     }
