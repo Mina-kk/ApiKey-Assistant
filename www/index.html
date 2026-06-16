@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: http: data: blob:; connect-src 'self' https: http:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; media-src 'self' blob:;" />
+  <meta name="theme-color" content="#070812" />
+  <meta name="color-scheme" content="dark" />
+  <title>ApiKey助手</title>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body class="dark">
+  <div class="app-shell">
+    <!-- 状态栏占位 -->
+    <div class="status-bar-spacer"></div>
+
+    <!-- 顶部应用栏 -->
+    <header class="app-bar">
+      <button class="icon-btn" id="menuBtn" type="button" aria-label="菜单">☰</button>
+      <div class="app-bar-title">
+        <h1>ApiKey助手</h1>
+        <p id="appBarSubtitle">By：呱呱</p>
+      </div>
+      <div class="app-bar-actions">
+        <button class="icon-btn" id="searchToggleBtn" type="button" aria-label="搜索">🔍</button>
+        <button class="icon-btn" id="themeBtn" type="button" aria-label="主题">🌙</button>
+        <button class="icon-btn" id="moreBtn" type="button" aria-label="更多">⋮</button>
+      </div>
+    </header>
+
+    <!-- 代理状态提示 -->
+    <section class="proxy-status" id="proxyStatusBar">
+      <span id="proxyStatusText">代理状态检测中...</span>
+      <span id="proxyLatencyText">延迟：--</span>
+    </section>
+
+    <!-- 搜索面板 -->
+    <section class="search-panel" id="searchPanel">
+      <input id="searchInput" type="text" placeholder="搜索名称、URL、服务商、模型..." />
+      <button class="icon-btn" id="clearSearchBtn" type="button">×</button>
+    </section>
+
+    <!-- 统计行 -->
+    <section class="stats-line">
+      <div class="stat-item">
+        <span class="stat-value" id="totalConfig">0</span>
+        <span class="stat-label">渠道</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="totalGroups">0</span>
+        <span class="stat-label">分组</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="totalKeys">0</span>
+        <span class="stat-label">Keys</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="totalModels">0</span>
+        <span class="stat-label">模型</span>
+      </div>
+    </section>
+
+    <!-- 批量操作栏 -->
+    <section class="batch-bar" id="batchBar">
+      <div class="batch-info">
+        <input type="checkbox" id="batchSelectAll" />
+        <label for="batchSelectAll">全选</label>
+        <span id="batchCount">已选 0 项</span>
+      </div>
+      <div class="batch-actions">
+        <button class="small-btn" id="batchEnableBtn" type="button">启用</button>
+        <button class="small-btn" id="batchDisableBtn" type="button">禁用</button>
+        <button class="small-btn" id="batchFetchModelsBtn" type="button">获取模型</button>
+        <button class="danger-btn small-btn" id="batchDeleteBtn" type="button">删除</button>
+        <button class="ghost-btn small-btn" id="batchCancelBtn" type="button">取消</button>
+      </div>
+    </section>
+
+    <!-- 主内容 -->
+    <main id="cardsContainer" class="cards-container"></main>
+
+    <!-- 分组抽屉 -->
+    <div class="drawer-mask" id="drawerMask"></div>
+    <aside class="drawer" id="drawer">
+      <div class="drawer-header">
+        <h2>分组</h2>
+        <button class="icon-btn" id="closeDrawerBtn" type="button">×</button>
+      </div>
+      <div class="drawer-body">
+        <div class="group-list" id="groupList"></div>
+        <button class="primary-btn" id="manageGroupsBtn" type="button" style="margin-top:16px;width:100%">管理分组</button>
+      </div>
+    </aside>
+
+    <!-- 更多菜单 -->
+    <div class="dropdown-menu" id="moreMenu">
+      <button class="menu-item" id="menuImportBtn" type="button">📥 导入</button>
+      <button class="menu-item" id="menuExportBtn" type="button">📤 导出</button>
+      <button class="menu-item" id="menuSettingsBtn" type="button">⚙️ 设置</button>
+      <button class="menu-item" id="menuSortBtn" type="button">⇅ 排序</button>
+      <button class="menu-item" id="menuBatchBtn" type="button">☰ 批量操作</button>
+      <button class="menu-item" id="menuClearAllModelsBtn" type="button">🗑 清空模型</button>
+      <button class="menu-item" id="menuFetchAllModelsBtn" type="button">🚀 批量获取模型</button>
+      <button class="menu-item" id="menuTestBtn" type="button">🧪 模型测试</button>
+      <button class="menu-item" id="menuLogBtn" type="button">📋 日志</button>
+    </div>
+
+    <!-- 渠道编辑弹窗 -->
+    <div class="modal-mask" id="editorModal">
+      <div class="modal modal-fullscreen">
+        <div class="modal-header">
+          <h2 id="editorTitle">新增渠道</h2>
+          <button class="icon-btn close-btn" id="closeEditorBtn" type="button">×</button>
+        </div>
+        <div class="modal-body">
+          <input id="editingId" type="hidden" />
+
+          <div class="form-section">
+            <h3>基本信息</h3>
+            <div class="form-group">
+              <label>名称 <span>*</span></label>
+              <input id="nameInput" type="text" placeholder="例如：OpenAI 官方" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>类型 <span>*</span></label>
+                <select id="typeInput"></select>
+              </div>
+              <div class="form-group">
+                <label>分组</label>
+                <select id="groupInput"></select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Base URL <span>*</span></label>
+              <div class="inline-input">
+                <input id="baseUrlInput" type="text" placeholder="https://api.openai.com/v1" />
+                <button class="small-btn" id="copyBaseInEditorBtn" type="button">复制</button>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>优先级</label>
+                <input id="priorityInput" type="number" value="0" />
+              </div>
+              <div class="form-group">
+                <label>权重</label>
+                <input id="weightInput" type="number" value="0" min="0" />
+              </div>
+              <div class="form-group">
+                <label>状态</label>
+                <label class="switch">
+                  <input id="statusInput" type="checkbox" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>标签</label>
+              <input id="tagInput" type="text" placeholder="多个标签用逗号分隔" />
+            </div>
+            <div class="form-group">
+              <label>备注</label>
+              <input id="remarkInput" type="text" placeholder="渠道备注" />
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>API Key</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>多 Key 模式</label>
+                <select id="multiKeyModeInput">
+                  <option value="0">单 Key</option>
+                  <option value="1">轮询</option>
+                  <option value="2">随机</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>自动禁用</label>
+                <label class="switch">
+                  <input id="autoBanInput" type="checkbox" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="row-title">
+                <label>Key 列表 <span>*</span></label>
+                <button class="small-btn" id="addKeyBtn" type="button">添加 Key</button>
+              </div>
+              <div id="keyRows" class="key-rows"></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>模型</h3>
+            <div class="form-group">
+              <label>测试模型</label>
+              <input id="testModelInput" type="text" placeholder="测试时使用的模型，留空取第一个" />
+            </div>
+            <div class="form-group">
+              <div class="row-title">
+                <label>模型列表</label>
+                <div class="mini-actions">
+                  <button class="small-btn" id="addModelBtn" type="button">添加</button>
+                  <button class="small-btn" id="editModelMappingBtn" type="button">模型映射</button>
+                  <button class="danger-btn small-btn" id="clearEditModelsBtn" type="button">清空</button>
+                </div>
+              </div>
+              <input id="modelInput" type="text" placeholder="输入模型名，回车添加" />
+              <div id="modelEditList" class="model-edit-list"></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>高级</h3>
+            <div class="form-group">
+              <label>参数覆盖 (JSON)</label>
+              <textarea id="paramOverrideInput" rows="2" placeholder='{"temperature": 0.5}'></textarea>
+            </div>
+            <div class="form-group">
+              <label>请求头覆盖 (JSON)</label>
+              <textarea id="headerOverrideInput" rows="2" placeholder='{"X-Custom": "value"}'></textarea>
+            </div>
+            <div class="form-group">
+              <label>其他设置 (JSON)</label>
+              <textarea id="otherSettingsInput" rows="2" placeholder='{"azure_version":"2024-12-01-preview"}'></textarea>
+            </div>
+          </div>
+
+          <div id="editorStatus" class="status-text"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="ghost-btn" id="fetchModelsInEditorBtn" type="button">获取模型</button>
+          <button class="ghost-btn" id="cancelEditorBtn" type="button">取消</button>
+          <button class="primary-btn" id="saveChannelBtn" type="button">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 模型映射弹窗 -->
+    <div class="modal-mask" id="modelMappingModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>模型映射</h2>
+          <button class="icon-btn close-btn" id="closeModelMappingBtn" type="button">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="tip-box">配置请求模型名到上游模型名的映射。例如：<code>{"gpt-4": "claude-3-opus"}</code></div>
+          <div class="mapping-list" id="mappingList"></div>
+          <button class="small-btn" id="addMappingBtn" type="button" style="margin-top:8px">+ 添加映射</button>
+        </div>
+        <div class="modal-footer">
+          <button class="ghost-btn" id="cancelModelMappingBtn" type="button">取消</button>
+          <button class="primary-btn" id="saveModelMappingBtn" type="button">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 测试弹窗 -->
+    <div class="modal-mask" id="testModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>模型测试</h2>
+          <button class="icon-btn close-btn" id="closeTestBtn" type="button">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>选择渠道 / Key</label>
+            <select id="testKeySelect"></select>
+          </div>
+          <div class="form-group">
+            <label>选择模型</label>
+            <select id="testModelSelect"></select>
+          </div>
+          <div class="form-group">
+            <label>测试提示词</label>
+            <textarea id="testPromptInput" rows="4">用中文简单回复：Hello, who are you?</textarea>
+          </div>
+          <div class="test-actions">
+            <button class="primary-btn" id="startTestBtn" type="button">开始测试</button>
+          </div>
+          <div class="form-group">
+            <label>返回结果</label>
+            <div id="testResultBox" class="result-box">暂无结果</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="ghost-btn" id="closeTestFooterBtn" type="button">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 导入弹窗 -->
+    <div class="modal-mask" id="importModal">
+      <div class="modal small-modal">
+        <div class="modal-header">
+          <h2>导入 JSON</h2>
+          <button class="icon-btn close-btn" id="closeImportBtn" type="button">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>粘贴 JSON 数据</label>
+            <textarea id="importTextarea" rows="10" placeholder="请粘贴导出的 JSON 数据"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="ghost-btn" id="readClipboardBtn" type="button">读取剪贴板</button>
+          <button class="ghost-btn" id="cancelImportBtn" type="button">取消</button>
+          <button class="primary-btn" id="confirmImportBtn" type="button">确认导入</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 导出弹窗 -->
+    <div class="modal-mask" id="exportModal">
+      <div class="modal small-modal">
+        <div class="modal-header">
+          <h2>导出数据</h2>
+          <button class="icon-btn close-btn" id="closeExportBtn" type="button">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="tip-box">请选择导出方式</div>
+          <div class="export-mode-actions">
+            <button class="primary-btn" id="exportCopyBtn" type="button">复制全部数据</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 设置弹窗 -->
+    <div class="modal-mask" id="settingsModal">
+      <div class="modal small-modal">
+        <div class="modal-header">
+          <h2>设置</h2>
+          <button class="icon-btn close-btn" id="closeSettingsBtn" type="button">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>主题</label>
+            <div class="segmented-control">
+              <button class="segment active" data-theme="dark">深色</button>
+              <button class="segment" data-theme="light">浅色</button>
+              <button class="segment" data-theme="auto">跟随系统</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>默认请求超时（秒）</label>
+            <input id="timeoutInput" type="number" value="60" />
+          </div>
+          <div class="form-group">
+            <label>批量并发数</label>
+            <input id="concurrencyInput" type="number" value="4" min="1" max="20" />
+          </div>
+          <div class="form-group">
+            <label>测试提示词</label>
+            <textarea id="defaultPromptInput" rows="3">用中文简单回复：Hello, who are you?</textarea>
+          </div>
+          <button class="danger-btn" id="clearAllDataBtn" type="button" style="width:100%;margin-top:8px">清除所有数据</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 分组管理弹窗 -->
+    <div class="modal-mask" id="groupModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>管理分组</h2>
+          <button class="icon-btn close-btn" id="closeGroupBtn" type="button">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <div class="inline-input">
+              <input id="newGroupInput" type="text" placeholder="新分组名称" />
+              <button class="small-btn" id="addGroupBtn" type="button">添加</button>
+            </div>
+          </div>
+          <div class="group-manage-list" id="groupManageList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 排序弹窗 -->
+    <div class="modal-mask" id="sortModal">
+      <div class="modal small-modal">
+        <div class="modal-header">
+          <h2>排序</h2>
+          <button class="icon-btn close-btn" id="closeSortBtn" type="button">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="sort-options">
+            <button class="sort-option" data-sort="priority" data-order="desc">优先级 ↓</button>
+            <button class="sort-option" data-sort="priority" data-order="asc">优先级 ↑</button>
+            <button class="sort-option" data-sort="weight" data-order="desc">权重 ↓</button>
+            <button class="sort-option" data-sort="weight" data-order="asc">权重 ↑</button>
+            <button class="sort-option" data-sort="response_time" data-order="asc">响应时间 ↑</button>
+            <button class="sort-option" data-sort="updated_time" data-order="desc">更新时间 ↓</button>
+            <button class="sort-option" data-sort="name" data-order="asc">名称 A-Z</button>
+            <button class="sort-option" data-sort="name" data-order="desc">名称 Z-A</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 日志弹窗 -->
+    <div class="modal-mask" id="logModal">
+      <div class="modal modal-fullscreen">
+        <div class="modal-header">
+          <h2>运行日志</h2>
+          <button class="icon-btn close-btn" id="closeLogBtn" type="button">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-section">
+            <p class="info-label">这里会记录网络请求、代理状态与应用错误。遇到问题时，可复制日志用于定位原因。</p>
+            <div class="form-row">
+              <button class="primary-btn" id="copyLogBtn" type="button">复制日志</button>
+              <button class="danger-btn" id="clearLogBtn" type="button">清空日志</button>
+            </div>
+          </div>
+          <pre id="logOutput" class="log-output"></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAB -->
+    <button id="addBtn" class="fab-btn" type="button">+</button>
+
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+  </div>
+
+  <script src="./cordova.js"></script>
+  <script src="./js/state.js"></script>
+  <script src="./js/utils.js"></script>
+  <script src="./js/api.js"></script>
+  <script src="./js/ui.js"></script>
+  <script src="./js/main.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+node_modules/
+platforms/
+plugins/
+package-lock.json
+www/cordova.js
+www/cordova_plugins.js
+.DS_Store
+*.log
+*.keystore
+*.jks
+release-signing.properties
+build/
+dist/
+.apk
+*.apk

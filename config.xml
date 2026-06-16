@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.apikey.gg.app" version="3.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>ApiKey助手</name>
+    <description>API Key 记录管理工具</description>
+    <author email="dev@example.com" href="https://github.com/QuantumNous/new-api">by：呱呱⚀⚁⚂⚄⚅Hello World</author>
+
+    <content src="index.html" />
+    <access origin="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
+    <allow-intent href="mailto:*" />
+    <allow-intent href="geo:*" />
+
+    <!-- Android 配置 -->
+    <platform name="android">
+        <preference name="android-minSdkVersion" value="24" />
+        <preference name="android-targetSdkVersion" value="34" />
+        <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/screen/android/splash.png" />
+        <preference name="AndroidWindowSplashScreenBackground" value="#070812" />
+        <preference name="StatusBarBackgroundColor" value="#070812" />
+        <preference name="StatusBarStyle" value="lightcontent" />
+        <preference name="BackgroundColor" value="0xFF070812" />
+        <preference name="DisallowOverscroll" value="true" />
+        <preference name="Fullscreen" value="false" />
+        <preference name="KeepRunning" value="true" />
+        <preference name="SplashScreenDelay" value="1500" />
+        <preference name="FadeSplashScreenDuration" value="300" />
+        <preference name="LoadUrlTimeoutValue" value="60000" />
+
+        <icon density="ldpi" src="res/icon/android/ldpi.png" />
+        <icon density="mdpi" src="res/icon/android/mdpi.png" />
+        <icon density="hdpi" src="res/icon/android/hdpi.png" />
+        <icon density="xhdpi" src="res/icon/android/xhdpi.png" />
+        <icon density="xxhdpi" src="res/icon/android/xxhdpi.png" />
+        <icon density="xxxhdpi" src="res/icon/android/xxxhdpi.png" />
+
+
+        <config-file parent="/manifest/application" target="AndroidManifest.xml">
+            <application android:usesCleartextTraffic="true" />
+        </config-file>
+
+        <config-file parent="/*" target="AndroidManifest.xml">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
+            <uses-permission android:name="android.permission.READ_CLIPBOARD_IN_BACKGROUND" />
+        </config-file>
+    </platform>
+
+    <!-- 常用插件 -->
+    <plugin name="cordova-plugin-statusbar" spec="^4.0.0" />
+    <plugin name="cordova-plugin-file" spec="^8.0.1" />
+    <plugin name="cordova-plugin-advanced-http" spec="^3.3.1" />
+    <plugin name="cordova-plugin-clipboard" spec="^1.0.0" />
+    <plugin name="cordova-plugin-device" spec="^2.1.0" />
+    <plugin name="cordova-plugin-android-permissions" spec="^1.1.5" />
+
+    <preference name="Orientation" value="portrait" />
+    <preference name="HideKeyboardFormAccessoryBar" value="false" />
+    <preference name="KeyboardResizeMode" value="native" />
+</widget>

@@ -1,0 +1,40 @@
+{
+  "name": "new-api-android",
+  "version": "3.0.0",
+  "description": "基于 QuantumNous/new-api 的移动端渠道管理工具（Cordova Android）",
+  "main": "index.js",
+  "scripts": {
+    "build": "cordova build android --release",
+    "build-debug": "cordova build android --debug",
+    "prepare": "cordova prepare android",
+    "platform-add": "cordova platform add android@13.0.0",
+    "plugin-add": "cordova plugin add cordova-plugin-statusbar cordova-plugin-splashscreen cordova-plugin-file cordova-plugin-advanced-http cordova-plugin-clipboard cordova-plugin-device cordova-plugin-android-permissions",
+    "clean": "rm -rf platforms/android/app/build"
+  },
+  "keywords": [
+    "new-api",
+    "cordova",
+    "android",
+    "llm-gateway",
+    "channel-manager"
+  ],
+  "author": "NewAPI Team",
+  "license": "MIT",
+  "devDependencies": {
+    "cordova": "^12.0.0",
+    "cordova-android": "^13.0.0"
+  },
+  "cordova": {
+    "platforms": [
+      "android"
+    ],
+    "plugins": {
+      "cordova-plugin-statusbar": {},
+      "cordova-plugin-file": {},
+      "cordova-plugin-advanced-http": {},
+      "cordova-plugin-clipboard": {},
+      "cordova-plugin-device": {},
+      "cordova-plugin-android-permissions": {}
+    }
+  }
+}
