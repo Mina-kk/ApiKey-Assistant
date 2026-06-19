@@ -166,7 +166,7 @@ function bindEvents() {
 
   // 排序
   els.closeSortBtn.addEventListener("click", function () { closeModal(els.sortModal); });
-  if (els.closeUpdateBtn) els.closeUpdateBtn.addEventListener("click", function () { closeModal(els.updateModal); });
+  if (els.closeUpdateBtn) els.closeUpdateBtn.addEventListener("click", function () { if (typeof clearUpdateAutoClose === "function") clearUpdateAutoClose(); closeModal(els.updateModal); });
   if (els.copyUpdateUrlBtn) els.copyUpdateUrlBtn.addEventListener("click", function () { copyText((els.updateDownloadUrl && els.updateDownloadUrl.textContent) || APP_RELEASES_URL, "下载地址已复制"); });
   if (els.openReleasePageBtn) els.openReleasePageBtn.addEventListener("click", function () { openExternalUrl(APP_RELEASES_URL); });
   if (els.downloadUpdateBtn) els.downloadUpdateBtn.addEventListener("click", downloadLatestUpdate);

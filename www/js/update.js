@@ -4,8 +4,10 @@ var APP_REPO_URL = "https://github.com/Mina-kk/ApiKey-Assistant";
 var APP_RELEASES_URL = APP_REPO_URL + "/releases";
 var APP_LATEST_RELEASE_API = "https://api.github.com/repos/Mina-kk/ApiKey-Assistant/releases/latest";
 var APP_TAGS_API = "https://api.github.com/repos/Mina-kk/ApiKey-Assistant/tags";
-var APP_CURRENT_VERSION = "3.0.41";
+var APP_CURRENT_VERSION = "3.0.42";
 var latestUpdateInfo = null;
+var updateAutoCloseTimer = null;
+var updateAutoCloseLeft = 0;
 
 function normalizeVersion(v) {
   return String(v || "").trim().replace(/^v/i, "").split(/[+-]/)[0];
@@ -61,6 +63,30 @@ function setUpdateInfo(html, type, url) {
   if (AppState.els.updateDownloadUrl) AppState.els.updateDownloadUrl.textContent = url || APP_RELEASES_URL;
 }
 
+function clearUpdateAutoClose() {
+  if (updateAutoCloseTimer) clearInterval(updateAutoCloseTimer);
+  updateAutoCloseTimer = null;
+  updateAutoCloseLeft = 0;
+}
+
+function startUpdateAutoClose(seconds) {
+  clearUpdateAutoClose();
+  updateAutoCloseLeft = seconds || 10;
+  function renderCountdown() {
+    var el = document.getElementById("updateAutoCloseText");
+    if (el) el.textContent = updateAutoCloseLeft + " 秒后自动关闭，可手动关闭或点击下载。";
+  }
+  renderCountdown();
+  updateAutoCloseTimer = setInterval(function () {
+    updateAutoCloseLeft -= 1;
+    renderCountdown();
+    if (updateAutoCloseLeft <= 0) {
+      clearUpdateAutoClose();
+      closeModal(AppState.els.updateModal);
+    }
+  }, 1000);
+}
+
 function fetchJson(url) {
   return fetch(url, { headers: { "Accept": "application/vnd.github+json" }, cache: "no-store" }).then(function (r) {
     if (!r.ok) throw new Error("HTTP " + r.status);
@@ -70,8 +96,9 @@ function fetchJson(url) {
 
 function checkForUpdates(silent) {
   if (!silent) {
+    clearUpdateAutoClose();
     latestUpdateInfo = null;
-    setUpdateInfo("正在检查 GitHub 最新版本...", "", APP_RELEASES_URL);
+    setUpdateInfo(renderVersionCompare("正在获取", "正在检查 GitHub 最新版本..."), "", APP_RELEASES_URL);
     openModal(AppState.els.updateModal);
   }
 
@@ -88,12 +115,16 @@ function checkForUpdates(silent) {
         downloadUrl
       );
       if (silent) {
-        if (confirm("发现新版本 " + latestVersion + "；当前程序版本 " + APP_CURRENT_VERSION + "，是否前往下载？")) openExternalUrl(downloadUrl);
+        openModal(AppState.els.updateModal);
+        startUpdateAutoClose(10);
       }
       return true;
     }
     setUpdateInfo(renderVersionCompare(latestVersion, "当前程序版本不低于仓库版本，无需更新。"), "", downloadUrl);
-    if (!silent) showToast("当前已是最新版本", "success");
+    if (!silent) {
+      clearUpdateAutoClose();
+      showToast("当前已是最新版本", "success");
+    }
     return false;
   }).catch(function (err) {
     return fetchJson(APP_TAGS_API).then(function (tags) {
@@ -106,7 +137,10 @@ function checkForUpdates(silent) {
           "success",
           APP_RELEASES_URL
         );
-        if (silent && confirm("发现新版本 " + tag + "；当前程序版本 " + APP_CURRENT_VERSION + "，是否打开 GitHub 下载？")) openExternalUrl(APP_RELEASES_URL);
+        if (silent) {
+          openModal(AppState.els.updateModal);
+          startUpdateAutoClose(10);
+        }
         return true;
       }
       setUpdateInfo(renderVersionCompare(tag || "未获取到", "当前程序版本不低于仓库版本，无需更新。"), "", APP_RELEASES_URL);

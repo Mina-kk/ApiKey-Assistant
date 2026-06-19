@@ -1258,3 +1258,11 @@ input:checked + .slider:before {
   color: var(--text);
   line-height: 1.6;
 }
+
+.update-countdown {
+  min-height: 20px;
+  margin: -4px 0 12px;
+  color: var(--warning);
+  font-size: 12px;
+  line-height: 1.5;
+}
