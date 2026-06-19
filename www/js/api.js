@@ -1,18 +1,19 @@
 // new-api 中继/适配器层（对应后端 relay/relay_adaptor.go）
 
-function doHttpRequest(method, url, headers, body, timeoutMs) {
+function doHttpRequest(method, url, headers, body, timeoutMs, logNetwork) {
   return new Promise(function (resolve, reject) {
     var timer = null;
     var finished = false;
     var startedAt = Date.now();
     var safeUrl = String(url || "").replace(/(key=)[^&]+/ig, "$1***");
-    if (typeof addLog === "function") addLog("debug", "HTTP request start", { method: method, url: safeUrl });
+    var shouldLogNetwork = !!logNetwork;
+    if (shouldLogNetwork && typeof addLog === "function") addLog("debug", "HTTP request start", { method: method, url: safeUrl });
 
     function done(ok, value) {
       if (finished) return;
       finished = true;
       if (timer) clearTimeout(timer);
-      if (typeof addLog === "function") addLog(ok ? "debug" : "error", "HTTP request " + (ok ? "success" : "failed"), {
+      if (shouldLogNetwork && typeof addLog === "function") addLog(ok ? "debug" : "error", "HTTP request " + (ok ? "success" : "failed"), {
         method: method,
         url: safeUrl,
         cost: Date.now() - startedAt,
@@ -39,7 +40,7 @@ function doHttpRequest(method, url, headers, body, timeoutMs) {
           done(false, new Error("NativeHttp plugin failed: " + msg));
         }, "NativeHttp", "request", [method, url, JSON.stringify(headers || {}), body || "", timeoutMs || 60000]);
       } catch (e) {
-        if (typeof addLog === "function") addLog("error", "NativeHttp invoke failed", e.message || String(e));
+        if (shouldLogNetwork && typeof addLog === "function") addLog("error", "NativeHttp invoke failed", e.message || String(e));
       }
       return;
     }
@@ -89,10 +90,7 @@ function joinApiPath(baseUrl, path) {
   var p = String(path || "");
   if (p.indexOf("/") !== 0) p = "/" + p;
 
-  // 兼容上游 Base URL 已经带版本号的情况：
-  // - OpenAI 类通常是 /v1 + /v1/xxx，需要去重
-  // - 智谱官方常填写 https://open.bigmodel.cn/api/paas/v4，
-  //   如果再拼 /v1/chat/completions 会变成 /v4/v1/... 导致测试失败。
+  // 版本路径去重，兼容已带 /v1-/v4 的 Base URL。
   if (/\/(v1|v2|v3|v4)$/i.test(clean) && /^\/v[1-4]\//i.test(p)) {
     p = p.replace(/^\/v[1-4]/i, "");
   }
@@ -122,7 +120,7 @@ function buildLocalProxyCandidates(targetUrl) {
   ]);
 }
 
-function requestViaLocalProxyOrDirect(method, url, headers, body, timeoutMs, preferProxy) {
+function requestViaLocalProxyOrDirect(method, url, headers, body, timeoutMs, preferProxy, logNetwork) {
   var candidates = buildLocalProxyCandidates(url);
   var index = 0;
 
@@ -135,12 +133,12 @@ function requestViaLocalProxyOrDirect(method, url, headers, body, timeoutMs, pre
       "X-Target-URL": url,
       "X-Proxy-Target": url
     });
-    return doHttpRequest(method, proxyUrl, h, body, timeoutMs).catch(tryProxy);
+    return doHttpRequest(method, proxyUrl, h, body, timeoutMs, logNetwork).catch(tryProxy);
   }
 
   if (preferProxy) return tryProxy();
 
-  return doHttpRequest(method, url, headers, body, timeoutMs).catch(function (err) {
+  return doHttpRequest(method, url, headers, body, timeoutMs, logNetwork).catch(function (err) {
     if (AppState.proxy && AppState.proxy.enabled) return tryProxy(err);
     return Promise.reject(err);
   });
@@ -315,9 +313,9 @@ function fetchUpstreamModels(channel) {
     // 特定接口优先使用原生网络通道；普通渠道按默认通道请求。
     var requestPromise;
     if (preferProxy && window.AndroidBridge && typeof window.AndroidBridge.httpRequest === "function") {
-      requestPromise = doHttpRequest("GET", url, headers, null, AppState.settings.timeout * 1000);
+      requestPromise = doHttpRequest("GET", url, headers, null, AppState.settings.timeout * 1000, true);
     } else {
-      requestPromise = requestViaLocalProxyOrDirect("GET", url, headers, null, AppState.settings.timeout * 1000, preferProxy);
+      requestPromise = requestViaLocalProxyOrDirect("GET", url, headers, null, AppState.settings.timeout * 1000, preferProxy, true);
     }
 
     requestPromise.then(function (raw) {
@@ -364,7 +362,7 @@ function testChannel(channel, modelName, prompt) {
     var headers = adaptor.getChatHeaders(key);
     var body = adaptor.buildChatRequest(upstreamModel, prompt || AppState.settings.defaultPrompt);
 
-    doHttpRequest("POST", url, headers, JSON.stringify(body), AppState.settings.timeout * 1000).then(function (raw) {
+    requestViaLocalProxyOrDirect("POST", url, headers, JSON.stringify(body), AppState.settings.timeout * 1000, isOpenCodeZenBase(channel.base_url), false).then(function (raw) {
       try {
         var data = JSON.parse(raw);
         var reply = adaptor.parseChatResponse(data);

@@ -400,12 +400,12 @@ function closeAllModals() {
 
 // 运行日志：记录网络请求、代理状态与应用错误
 var LOG_STORAGE_KEY = "new_api_runtime_logs_v1";
-var MAX_LOG_LINES = 500;
+var MAX_LOG_LINES = 30;
 
 function getLogs() {
   try {
     var arr = JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || "[]");
-    return Array.isArray(arr) ? arr : [];
+    return Array.isArray(arr) ? arr.slice(-MAX_LOG_LINES) : [];
   } catch (e) { return []; }
 }
 
@@ -413,7 +413,27 @@ function saveLogs(arr) {
   try { localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(arr.slice(-MAX_LOG_LINES))); } catch (e) {}
 }
 
+function shouldKeepRuntimeLog(level, message) {
+  message = String(message || "");
+
+  // 运行日志白名单：初始化、模型获取与全局错误。
+  if (message === "app initialized") return true;
+  if (message === "fetchUpstreamModels") return true;
+  if (message === "model raw response") return true;
+  if (message === "models fetched") return true;
+  if (message === "fetchUpstreamModels failed") return true;
+  if (message === "parse model list failed") return true;
+  if (message === "window.error" || message === "unhandledrejection") return true;
+
+  // 模型获取过程的网络日志。
+  if (/^HTTP request /.test(message)) return true;
+  if (message === "NativeHttp invoke failed") return true;
+
+  return false;
+}
+
 function addLog(level, message, data) {
+  if (!shouldKeepRuntimeLog(level, message)) return;
   var line = {
     time: new Date().toISOString(),
     level: level || "info",
