@@ -13,6 +13,7 @@ function initApp() {
   if (typeof initNewApiEvents === "function") initNewApiEvents();
   renderAll();
   startProxyMonitor();
+  setTimeout(function () { if (typeof checkForUpdates === "function") checkForUpdates(true); }, 1800);
   if (typeof addLog === "function") addLog("info", "app initialized", { androidBridge: !!window.AndroidBridge, userAgent: navigator.userAgent });
 }
 
@@ -65,6 +66,8 @@ function bindEvents() {
   els.menuClearAllModelsBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); clearAllModels(); });
   els.menuFetchAllModelsBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); fetchAllModels(); });
   els.menuTestBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); openTestModal(); });
+  if (els.menuUpdateBtn) els.menuUpdateBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); checkForUpdates(false); });
+  if (els.menuAboutBtn) els.menuAboutBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); openAboutModal(); });
   if (els.menuLogBtn) els.menuLogBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); openLogModal(); });
 
   // FAB
@@ -163,6 +166,13 @@ function bindEvents() {
 
   // 排序
   els.closeSortBtn.addEventListener("click", function () { closeModal(els.sortModal); });
+  if (els.closeUpdateBtn) els.closeUpdateBtn.addEventListener("click", function () { closeModal(els.updateModal); });
+  if (els.copyUpdateUrlBtn) els.copyUpdateUrlBtn.addEventListener("click", function () { copyText((els.updateDownloadUrl && els.updateDownloadUrl.textContent) || APP_RELEASES_URL, "下载地址已复制"); });
+  if (els.openReleasePageBtn) els.openReleasePageBtn.addEventListener("click", function () { openExternalUrl(APP_RELEASES_URL); });
+  if (els.downloadUpdateBtn) els.downloadUpdateBtn.addEventListener("click", downloadLatestUpdate);
+  if (els.closeAboutBtn) els.closeAboutBtn.addEventListener("click", function () { closeModal(els.aboutModal); });
+  if (els.copyGithubUrlBtn) els.copyGithubUrlBtn.addEventListener("click", function () { copyText(APP_REPO_URL, "GitHub 地址已复制"); });
+  if (els.openGithubBtn) els.openGithubBtn.addEventListener("click", function () { openExternalUrl(APP_REPO_URL); });
   if (els.closeLogBtn) els.closeLogBtn.addEventListener("click", function () { closeModal(els.logModal); });
   if (els.copyLogBtn) els.copyLogBtn.addEventListener("click", copyLogs);
   if (els.clearLogBtn) els.clearLogBtn.addEventListener("click", clearLogs);
@@ -194,7 +204,7 @@ function bindEvents() {
   els.batchCancelBtn.addEventListener("click", disableBatchMode);
 
   // 弹窗外点击关闭
-  [els.editorModal, els.modelMappingModal, els.testModal, els.importModal, els.exportModal, els.settingsModal, els.groupModal, els.sortModal, els.newApiModal].forEach(function (modal) {
+  [els.editorModal, els.modelMappingModal, els.testModal, els.importModal, els.exportModal, els.settingsModal, els.groupModal, els.sortModal, els.updateModal, els.aboutModal, els.newApiModal, els.logModal].forEach(function (modal) {
     if (!modal) return;
     modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(modal); });
   });

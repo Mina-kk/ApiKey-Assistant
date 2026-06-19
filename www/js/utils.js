@@ -395,7 +395,7 @@ function openModal(el) { if (el) el.classList.add("active"); }
 function closeModal(el) { if (el) el.classList.remove("active"); }
 
 function closeAllModals() {
-  ["editorModal", "modelMappingModal", "testModal", "importModal", "exportModal", "settingsModal", "groupModal", "sortModal", "newApiModal"].forEach(function (id) {
+  ["editorModal", "modelMappingModal", "testModal", "importModal", "exportModal", "settingsModal", "groupModal", "sortModal", "updateModal", "aboutModal", "newApiModal", "logModal"].forEach(function (id) {
     closeModal(AppState.els[id]);
   });
 }

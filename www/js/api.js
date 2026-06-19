@@ -26,7 +26,6 @@ function doHttpRequest(method, url, headers, body, timeoutMs, logNetwork) {
       timer = setTimeout(function () { done(false, new Error("请求超时")); }, timeoutMs);
     }
 
-    // 优先使用 Cordova 原生请求通道，避免 WebView 跨域与本地网络限制。
     if (window.cordova && typeof cordova.exec === "function") {
       try {
         cordova.exec(function (nativeResp) {
@@ -45,7 +44,6 @@ function doHttpRequest(method, url, headers, body, timeoutMs, logNetwork) {
       return;
     }
 
-    // 备用原生桥请求通道。
     if (window.AndroidBridge && typeof window.AndroidBridge.httpRequest === "function") {
       try {
         var nativeRaw = window.AndroidBridge.httpRequest(method, url, JSON.stringify(headers || {}), body || "");
@@ -56,7 +54,6 @@ function doHttpRequest(method, url, headers, body, timeoutMs, logNetwork) {
       return;
     }
 
-    // Cordova 原生 HTTP 插件（绕过 CORS）
     if (window.cordova && cordova.plugin && cordova.plugin.http) {
       var options = {
         method: method,
@@ -72,7 +69,6 @@ function doHttpRequest(method, url, headers, body, timeoutMs, logNetwork) {
       return;
     }
 
-    // 浏览器 fetch 降级
     var controller = new AbortController();
     var opts = { method: method, headers: headers || {}, signal: controller.signal };
     if (body) opts.body = body;
@@ -90,7 +86,6 @@ function joinApiPath(baseUrl, path) {
   var p = String(path || "");
   if (p.indexOf("/") !== 0) p = "/" + p;
 
-  // 版本路径去重，兼容已带 /v1-/v4 的 Base URL。
   if (/\/(v1|v2|v3|v4)$/i.test(clean) && /^\/v[1-4]\//i.test(p)) {
     p = p.replace(/^\/v[1-4]/i, "");
   }
@@ -327,7 +322,6 @@ function fetchUpstreamModels(channel, options) {
       hasNativeHttp: !!(window.cordova && typeof cordova.exec === "function")
     });
 
-    // 特定接口优先使用原生网络通道；普通渠道按默认通道请求。
     var requestPromise;
     if (preferProxy && !disableProxy && window.AndroidBridge && typeof window.AndroidBridge.httpRequest === "function") {
       requestPromise = doHttpRequest("GET", url, headers, null, timeoutMs, true);

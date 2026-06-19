@@ -44,7 +44,7 @@ function onBackButton(e) {
     return;
   }
 
-  var activeModal = ["editorModal", "modelMappingModal", "testModal", "importModal", "exportModal", "settingsModal", "groupModal", "sortModal", "newApiModal"].find(function (id) {
+  var activeModal = ["editorModal", "modelMappingModal", "testModal", "importModal", "exportModal", "settingsModal", "groupModal", "sortModal", "updateModal", "aboutModal", "newApiModal", "logModal"].find(function (id) {
     return AppState.els[id] && AppState.els[id].classList.contains("active");
   });
 
