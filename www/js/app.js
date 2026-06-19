@@ -1,6 +1,4 @@
-// ============================================================
 // Android 生命周期与桥接层
-// ============================================================
 
 document.addEventListener("deviceready", onDeviceReady, false);
 
@@ -46,7 +44,7 @@ function onBackButton(e) {
     return;
   }
 
-  var activeModal = ["editorModal", "modelMappingModal", "testModal", "importModal", "exportModal", "settingsModal", "groupModal", "sortModal"].find(function (id) {
+  var activeModal = ["editorModal", "modelMappingModal", "testModal", "importModal", "exportModal", "settingsModal", "groupModal", "sortModal", "newApiModal"].find(function (id) {
     return AppState.els[id] && AppState.els[id].classList.contains("active");
   });
 

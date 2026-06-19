@@ -1,10 +1,8 @@
-// ============================================================
 // UI 渲染层
-// ============================================================
 
 function cacheElements() {
   var ids = [
-    "menuBtn", "searchToggleBtn", "themeBtn", "moreBtn", "appBarSubtitle",
+    "menuBtn", "searchToggleBtn", "themeBtn", "newApiEntryBtn", "moreBtn", "appBarSubtitle",
     "proxyStatusBar", "proxyStatusText", "proxyLatencyText",
     "searchPanel", "searchInput", "clearSearchBtn",
     "totalConfig", "totalGroups", "totalKeys", "totalModels",
@@ -28,9 +26,12 @@ function cacheElements() {
     "testPromptInput", "startTestBtn", "testResultBox",
     "importModal", "closeImportBtn", "cancelImportBtn", "confirmImportBtn", "readClipboardBtn", "importTextarea",
     "exportModal", "closeExportBtn", "exportCopyBtn",
-    "settingsModal", "closeSettingsBtn", "timeoutInput", "concurrencyInput", "defaultPromptInput", "clearAllDataBtn",
+    "settingsModal", "closeSettingsBtn", "timeoutInput", "concurrencyInput", "defaultPromptInput", "newApiEnabledInput", "clearAllDataBtn",
     "groupModal", "closeGroupBtn", "newGroupInput", "addGroupBtn", "groupManageList",
     "sortModal", "closeSortBtn", "logModal", "closeLogBtn", "copyLogBtn", "clearLogBtn", "logOutput",
+    "newApiModal", "closeNewApiBtn", "newApiChannelSelect", "newApiSuffixInput", "newApiModelsInput",
+    "newApiLoadChannelBtn", "newApiClearBtn", "newApiGenerateBtn", "newApiCopyResultBtn", "newApiCopyMappingBtn",
+    "newApiResultOutput", "newApiCountDisplay", "newApiMappingOutput",
     "addBtn", "toast"
   ];
   ids.forEach(function (id) { AppState.els[id] = $(id); });

@@ -1,6 +1,4 @@
-// ============================================================
 // 应用入口与事件绑定层
-// ============================================================
 
 document.addEventListener("DOMContentLoaded", initApp);
 
@@ -12,6 +10,7 @@ function initApp() {
   populateTypeSelect();
   applyTheme();
   bindEvents();
+  if (typeof initNewApiEvents === "function") initNewApiEvents();
   renderAll();
   startProxyMonitor();
   if (typeof addLog === "function") addLog("info", "app initialized", { androidBridge: !!window.AndroidBridge, userAgent: navigator.userAgent });
@@ -42,6 +41,7 @@ function bindEvents() {
     var item = e.target.closest(".group-item");
     if (!item) return;
     AppState.currentGroup = item.dataset.group;
+    els.appBarSubtitle.textContent = AppState.currentGroup ? item.querySelector("span").textContent : "全部渠道";
     closeDrawer();
     renderAll();
   });
@@ -188,7 +188,7 @@ function bindEvents() {
   els.batchCancelBtn.addEventListener("click", disableBatchMode);
 
   // 弹窗外点击关闭
-  [els.editorModal, els.modelMappingModal, els.testModal, els.importModal, els.exportModal, els.settingsModal, els.groupModal, els.sortModal].forEach(function (modal) {
+  [els.editorModal, els.modelMappingModal, els.testModal, els.importModal, els.exportModal, els.settingsModal, els.groupModal, els.sortModal, els.newApiModal].forEach(function (modal) {
     if (!modal) return;
     modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(modal); });
   });
@@ -257,6 +257,7 @@ function openSettingsModal() {
   AppState.els.timeoutInput.value = AppState.settings.timeout;
   AppState.els.concurrencyInput.value = AppState.settings.concurrency;
   AppState.els.defaultPromptInput.value = AppState.settings.defaultPrompt;
+  if (AppState.els.newApiEnabledInput) AppState.els.newApiEnabledInput.checked = !!AppState.settings.newApiEnabled;
   updateThemeSegments();
   openModal(AppState.els.settingsModal);
 }

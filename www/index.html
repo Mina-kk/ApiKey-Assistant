@@ -24,6 +24,7 @@
       <div class="app-bar-actions">
         <button class="icon-btn" id="searchToggleBtn" type="button" aria-label="搜索">🔍</button>
         <button class="icon-btn" id="themeBtn" type="button" aria-label="主题">🌙</button>
+        <button class="icon-btn newapi-entry-btn" id="newApiEntryBtn" type="button" aria-label="NewAPI" title="NewAPI" style="display:none">N</button>
         <button class="icon-btn" id="moreBtn" type="button" aria-label="更多">⋮</button>
       </div>
     </header>
@@ -359,6 +360,16 @@
             <label>测试提示词</label>
             <textarea id="defaultPromptInput" rows="3">用中文简单回复：Hello, who are you?</textarea>
           </div>
+          <div class="form-group switch-row">
+            <div>
+              <label>NewAPI 模型命名工具</label>
+              <p class="setting-desc">开启后会在顶部搜索、主题按钮右侧显示 NewAPI 入口。</p>
+            </div>
+            <label class="switch">
+              <input id="newApiEnabledInput" type="checkbox" />
+              <span class="slider"></span>
+            </label>
+          </div>
           <button class="danger-btn" id="clearAllDataBtn" type="button" style="width:100%;margin-top:8px">清除所有数据</button>
         </div>
       </div>
@@ -425,6 +436,59 @@
       </div>
     </div>
 
+    <!-- NewAPI 模型命名工具弹窗 -->
+    <div class="modal-mask" id="newApiModal">
+      <div class="modal modal-fullscreen">
+        <div class="modal-header">
+          <h2>NewAPI 模型命名工具</h2>
+          <button class="icon-btn close-btn" id="closeNewApiBtn" type="button">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="tip-box">选择渠道后请手动点击导入渠道模型；切换渠道会自动清空已导入模型，避免混乱。也可以手动输入模型名。多个模型请用英文逗号 <code>,</code> 分隔。</div>
+          <div class="form-section">
+            <h3>来源</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>选择渠道</label>
+                <select id="newApiChannelSelect"></select>
+              </div>
+              <div class="form-group">
+                <label>自定义后缀 <span>*</span></label>
+                <input id="newApiSuffixInput" type="text" placeholder="例如：opencode" />
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="row-title">
+                <label>模型列表（逗号分隔）</label>
+                <div class="mini-actions">
+                  <button class="small-btn" id="newApiLoadChannelBtn" type="button">导入渠道模型</button>
+                  <button class="danger-btn small-btn" id="newApiClearBtn" type="button">清空</button>
+                </div>
+              </div>
+              <textarea id="newApiModelsInput" rows="6" placeholder="gpt-4o, claude-3-5-sonnet, deepseek-chat"></textarea>
+            </div>
+            <div class="form-row">
+              <button class="primary-btn" id="newApiGenerateBtn" type="button">生成</button>
+              <button class="ghost-btn" id="newApiCopyResultBtn" type="button">复制结果</button>
+              <button class="ghost-btn" id="newApiCopyMappingBtn" type="button">复制映射</button>
+            </div>
+          </div>
+          <div class="form-section">
+            <h3>导出结果</h3>
+            <div class="form-group">
+              <label>模型命名结果</label>
+              <textarea id="newApiResultOutput" rows="4" readonly></textarea>
+              <div class="count">模型数量：<span id="newApiCountDisplay">0</span></div>
+            </div>
+            <div class="form-group">
+              <label>模型重定向（JSON）</label>
+              <textarea id="newApiMappingOutput" rows="8" readonly></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- FAB -->
     <button id="addBtn" class="fab-btn" type="button">+</button>
 
@@ -439,6 +503,7 @@
   <script src="./js/api.js"></script>
   <script src="./js/ui.js"></script>
   <script src="./js/main.js"></script>
+  <script src="./js/newapi.js"></script>
   <script src="./js/app.js"></script>
 </body>
 </html>

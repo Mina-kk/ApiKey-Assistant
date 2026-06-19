@@ -1,7 +1,5 @@
-// ============================================================
 // new-api 工具函数层
 // Channel 标准化、Key 解析、模型映射、分组、存储、剪贴板等
-// ============================================================
 
 function $(id) { return document.getElementById(id); }
 
@@ -305,6 +303,7 @@ function ensureRuntimeState() {
   if (!AppState.settings.concurrency) AppState.settings.concurrency = 4;
   if (!AppState.settings.defaultPrompt) AppState.settings.defaultPrompt = "用中文简单回复：Hello, who are you?";
   if (!AppState.settings.localProxyUrl) AppState.settings.localProxyUrl = "http://127.0.0.1:9527";
+  if (typeof AppState.settings.newApiEnabled !== "boolean") AppState.settings.newApiEnabled = false;
   if (!AppState.proxy) AppState.proxy = {};
   if (typeof AppState.proxy.enabled !== "boolean") AppState.proxy.enabled = false;
   if (AppState.proxy.latency === undefined) AppState.proxy.latency = null;
@@ -394,14 +393,12 @@ function openModal(el) { if (el) el.classList.add("active"); }
 function closeModal(el) { if (el) el.classList.remove("active"); }
 
 function closeAllModals() {
-  ["editorModal", "modelMappingModal", "testModal", "importModal", "exportModal", "settingsModal", "groupModal", "sortModal"].forEach(function (id) {
+  ["editorModal", "modelMappingModal", "testModal", "importModal", "exportModal", "settingsModal", "groupModal", "sortModal", "newApiModal"].forEach(function (id) {
     closeModal(AppState.els[id]);
   });
 }
 
-// ============================================================
 // 运行日志：记录网络请求、代理状态与应用错误
-// ============================================================
 var LOG_STORAGE_KEY = "new_api_runtime_logs_v1";
 var MAX_LOG_LINES = 500;
 

@@ -244,17 +244,6 @@ input, select, textarea { font-size: 16px; }
   gap: 6px;
 }
 
-.batch-actions select {
-  min-width: 96px;
-  border: 1px solid var(--border);
-  background: var(--panel);
-  color: var(--text);
-  border-radius: 10px;
-  padding: 7px 9px;
-  font-size: 12px;
-  outline: none;
-}
-
 /* 卡片容器 */
 .cards-container {
   display: grid;
@@ -1085,4 +1074,100 @@ input:checked + .slider:before {
 #proxyLatencyText strong {
   font-size: 12px;
   font-weight: 800;
+}
+
+/* 长分组名称与卡片按钮布局优化 */
+.card-head {
+  align-items: flex-start;
+}
+.card-title {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.card-actions {
+  flex: 0 0 auto;
+  align-items: center;
+}
+.card-head > .card-actions {
+  flex-direction: column;
+  width: 64px;
+  gap: 7px;
+}
+.card-head > .card-actions .small-btn,
+.card-head > .card-actions .danger-btn {
+  width: 100%;
+  min-width: 56px;
+  padding: 8px 6px;
+  overflow: visible;
+  text-overflow: clip;
+}
+.badges .badge {
+  min-width: 0;
+}
+
+.group-item span:first-child,
+.group-manage-item > span:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.group-manage-item {
+  gap: 10px;
+}
+.group-manage-item .card-actions {
+  flex: 0 0 auto;
+}
+.group-manage-item .card-actions .small-btn {
+  min-width: 58px;
+  padding-left: 8px;
+  padding-right: 8px;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* NewAPI 入口与设置项 */
+.newapi-entry-btn {
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  font-size: 14px;
+}
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+}
+.switch-row label { margin-bottom: 0; }
+.setting-desc {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.count {
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.count span {
+  color: var(--primary);
+  font-weight: 800;
+}
+.mini-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+#newApiResultOutput,
+#newApiMappingOutput,
+#newApiModelsInput {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }

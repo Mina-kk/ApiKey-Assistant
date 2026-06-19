@@ -1,6 +1,4 @@
-// ============================================================
 // new-api 前端常量层（对应后端 constant/channel.go & api_type.go）
-// ============================================================
 
 var ChannelType = {
   Unknown: 0,
@@ -247,7 +245,8 @@ var AppState = {
     timeout: 60,
     concurrency: 4,
     defaultPrompt: "用中文简单回复：Hello, who are you?",
-    localProxyUrl: "http://127.0.0.1:9527"
+    localProxyUrl: "http://127.0.0.1:9527",
+    newApiEnabled: false
   },
   proxy: {
     enabled: false,

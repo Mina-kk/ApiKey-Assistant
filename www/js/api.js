@@ -1,6 +1,4 @@
-// ============================================================
 // new-api 中继/适配器层（对应后端 relay/relay_adaptor.go）
-// ============================================================
 
 function doHttpRequest(method, url, headers, body, timeoutMs) {
   return new Promise(function (resolve, reject) {
@@ -125,10 +123,10 @@ function buildLocalProxyCandidates(targetUrl) {
 }
 
 function requestViaLocalProxyOrDirect(method, url, headers, body, timeoutMs, preferProxy) {
-  if (!preferProxy) return doHttpRequest(method, url, headers, body, timeoutMs);
   var candidates = buildLocalProxyCandidates(url);
   var index = 0;
-  function tryNext(lastErr) {
+
+  function tryProxy(lastErr) {
     if (index >= candidates.length) {
       return Promise.reject(lastErr || new Error("本地代理请求失败"));
     }
@@ -137,9 +135,15 @@ function requestViaLocalProxyOrDirect(method, url, headers, body, timeoutMs, pre
       "X-Target-URL": url,
       "X-Proxy-Target": url
     });
-    return doHttpRequest(method, proxyUrl, h, body, timeoutMs).catch(tryNext);
+    return doHttpRequest(method, proxyUrl, h, body, timeoutMs).catch(tryProxy);
   }
-  return tryNext();
+
+  if (preferProxy) return tryProxy();
+
+  return doHttpRequest(method, url, headers, body, timeoutMs).catch(function (err) {
+    if (AppState.proxy && AppState.proxy.enabled) return tryProxy(err);
+    return Promise.reject(err);
+  });
 }
 
 // 模型列表解析
