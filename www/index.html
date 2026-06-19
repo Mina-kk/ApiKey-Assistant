@@ -141,6 +141,15 @@
                 <button class="small-btn" id="copyBaseInEditorBtn" type="button">复制</button>
               </div>
             </div>
+            <div class="form-group">
+              <label>模型获取方式</label>
+              <select id="modelFetchModeInput">
+                <option value="auto">自动选择</option>
+                <option value="direct">直接获取</option>
+                <option value="proxy">本地代理</option>
+              </select>
+              <small class="field-help">获取不到模型时可切换直接获取或本地代理。</small>
+            </div>
             <div class="form-row">
               <div class="form-group">
                 <label>优先级</label>
@@ -354,7 +363,12 @@
           </div>
           <div class="form-group">
             <label>批量并发数</label>
-            <input id="concurrencyInput" type="number" value="4" min="1" max="20" />
+            <input id="concurrencyInput" type="number" value="6" min="1" max="20" />
+          </div>
+          <div class="form-group">
+            <label>批量获取单渠道超时（秒）</label>
+            <input id="batchModelTimeoutInput" type="number" value="25" min="5" max="120" />
+            <small class="field-help">慢渠道超过此时间会记为失败，不会拖住其它渠道。</small>
           </div>
           <div class="form-group">
             <label>测试提示词</label>

@@ -140,7 +140,13 @@ function bindEvents() {
     saveSettings();
   });
   els.concurrencyInput.addEventListener("change", function () {
-    AppState.settings.concurrency = Number(els.concurrencyInput.value) || 4;
+    AppState.settings.concurrency = Math.max(1, Math.min(20, Number(els.concurrencyInput.value) || 6));
+    els.concurrencyInput.value = AppState.settings.concurrency;
+    saveSettings();
+  });
+  if (els.batchModelTimeoutInput) els.batchModelTimeoutInput.addEventListener("change", function () {
+    AppState.settings.batchModelTimeout = Math.max(5, Math.min(120, Number(els.batchModelTimeoutInput.value) || 25));
+    els.batchModelTimeoutInput.value = AppState.settings.batchModelTimeout;
     saveSettings();
   });
   els.defaultPromptInput.addEventListener("change", function () {
@@ -256,6 +262,7 @@ function updateThemeSegments() {
 function openSettingsModal() {
   AppState.els.timeoutInput.value = AppState.settings.timeout;
   AppState.els.concurrencyInput.value = AppState.settings.concurrency;
+  if (AppState.els.batchModelTimeoutInput) AppState.els.batchModelTimeoutInput.value = AppState.settings.batchModelTimeout || 25;
   AppState.els.defaultPromptInput.value = AppState.settings.defaultPrompt;
   if (AppState.els.newApiEnabledInput) AppState.els.newApiEnabledInput.checked = !!AppState.settings.newApiEnabled;
   updateThemeSegments();
@@ -327,6 +334,7 @@ function buildChannelFromEditor() {
     key: rawKeys.join("\n"),
     keys: keys,
     base_url: baseUrl,
+    model_fetch_mode: els.modelFetchModeInput ? els.modelFetchModeInput.value : (old && old.model_fetch_mode ? old.model_fetch_mode : "auto"),
     models: uniqueArray(AppState.editModels),
     model_mapping: Object.keys(mapping).length ? safeJsonStringify(mapping) : null,
     group: group,
@@ -380,7 +388,7 @@ function fetchModelsInEditor() {
   var firstKey = keys.length ? keys[0].value : "";
   if (!baseUrl || !firstKey) { setStatus(els.editorStatus, "请先填写 Base URL 和 Key", "error"); return; }
 
-  var tempChannel = normalizeChannel({ type: channelType, base_url: baseUrl, key: firstKey });
+  var tempChannel = normalizeChannel({ type: channelType, base_url: baseUrl, key: firstKey, model_fetch_mode: els.modelFetchModeInput ? els.modelFetchModeInput.value : "auto" });
   setStatus(els.editorStatus, "正在获取模型...");
   fetchUpstreamModels(tempChannel).then(function (models) {
     AppState.editModels = uniqueArray(AppState.editModels.concat(models));
@@ -560,26 +568,54 @@ function clearAllModels() {
   showToast("已清空所有模型", "success");
 }
 
-function fetchAllModels() {
-  if (!AppState.channels.length) { showToast("暂无渠道", "warning"); return; }
-  showToast("开始批量获取模型...", "info");
-  var tasks = AppState.channels.map(function (ch) {
+
+function confirmBatchModelFetch(count) {
+  return confirm("准备批量获取 " + count + " 个渠道的模型。\n\n提醒：批量获取模型时请尽量关闭代理/VPN，挂着代理可能导致部分渠道获取不到模型结果。\n\n已为批量获取启用并发和单渠道超时，慢渠道不会阻塞其它渠道。是否继续？");
+}
+
+function buildFetchModelsTasks(channels) {
+  var timeoutMs = getBatchModelFetchTimeoutMs();
+  return channels.map(function (ch) {
     return function () {
       if (!getChannelFirstKey(ch)) return Promise.reject(new Error("无 Key"));
-      return fetchUpstreamModels(ch).then(function (models) {
+      var oldCount = uniqueArray(ch.models || []).length;
+      return fetchUpstreamModels(ch, { timeoutMs: timeoutMs }).then(function (models) {
         ch.models = uniqueArray((ch.models || []).concat(models));
         ch.updated_time = Date.now();
-        return models.length;
+        return Math.max(0, ch.models.length - oldCount);
       });
     };
   });
-  runWithConcurrency(tasks, AppState.settings.concurrency).then(function (results) {
+}
+
+function summarizeBatchModelResults(results) {
+  var success = results.filter(function (r) { return r && r.status === "fulfilled"; }).length;
+  var fail = results.length - success;
+  var totalAdded = results.reduce(function (sum, r) { return sum + (r && r.status === "fulfilled" ? r.value : 0); }, 0);
+  var failSamples = results.map(function (r, i) {
+    if (!r || r.status !== "rejected") return "";
+    var msg = r.reason && r.reason.message ? r.reason.message : String(r.reason || "失败");
+    return "#" + (i + 1) + " " + msg;
+  }).filter(Boolean).slice(0, 3);
+  var text = "成功 " + success + " 失败 " + fail + " 新增 " + totalAdded + " 模型";
+  if (failSamples.length) text += "；失败示例：" + failSamples.join("；");
+  return { success: success, fail: fail, totalAdded: totalAdded, text: text };
+}
+
+function fetchAllModels() {
+  if (!AppState.channels.length) { showToast("暂无渠道", "warning"); return; }
+  if (!confirmBatchModelFetch(AppState.channels.length)) return;
+  var concurrency = Math.max(1, Number(AppState.settings.concurrency) || 6);
+  var timeoutSec = Math.round(getBatchModelFetchTimeoutMs() / 1000);
+  showToast("开始并发获取模型：并发 " + concurrency + "，单渠道超时 " + timeoutSec + " 秒", "info");
+  var tasks = buildFetchModelsTasks(AppState.channels);
+  runWithConcurrency(tasks, concurrency, function (result, index, finished, total) {
+    if (finished === total || finished % 3 === 0) showToast("批量获取进度 " + finished + "/" + total, "info");
+  }).then(function (results) {
     saveChannels();
     renderAll();
-    var success = results.filter(function (r) { return r.status === "fulfilled"; }).length;
-    var fail = results.length - success;
-    var totalAdded = results.reduce(function (sum, r) { return sum + (r.status === "fulfilled" ? r.value : 0); }, 0);
-    showToast("成功 " + success + " 失败 " + fail + " 新增 " + totalAdded + " 模型", totalAdded > 0 ? "success" : "warning");
+    var summary = summarizeBatchModelResults(results);
+    showToast(summary.text, summary.totalAdded > 0 ? "success" : "warning");
   });
 }
 
@@ -649,25 +685,20 @@ function batchDelete() {
 function batchFetchModels() {
   var ids = getSelectedIds();
   if (!ids.length) { showToast("未选择任何渠道", "warning"); return; }
-  showToast("开始批量获取模型...", "info");
   var selectedChannels = AppState.channels.filter(function (ch) { return ids.indexOf(ch.id) !== -1; });
-  var tasks = selectedChannels.map(function (ch) {
-    return function () {
-      if (!getChannelFirstKey(ch)) return Promise.reject(new Error("无 Key"));
-      return fetchUpstreamModels(ch).then(function (models) {
-        ch.models = uniqueArray((ch.models || []).concat(models));
-        ch.updated_time = Date.now();
-        return models.length;
-      });
-    };
-  });
-  runWithConcurrency(tasks, AppState.settings.concurrency).then(function (results) {
+  if (!confirmBatchModelFetch(selectedChannels.length)) return;
+  var concurrency = Math.max(1, Number(AppState.settings.concurrency) || 6);
+  var timeoutSec = Math.round(getBatchModelFetchTimeoutMs() / 1000);
+  showToast("开始并发获取模型：并发 " + concurrency + "，单渠道超时 " + timeoutSec + " 秒", "info");
+  var tasks = buildFetchModelsTasks(selectedChannels);
+  runWithConcurrency(tasks, concurrency, function (result, index, finished, total) {
+    if (finished === total || finished % 3 === 0) showToast("批量获取进度 " + finished + "/" + total, "info");
+  }).then(function (results) {
     saveChannels();
     renderAll();
-    var success = results.filter(function (r) { return r.status === "fulfilled"; }).length;
-    var fail = results.length - success;
-    var totalAdded = results.reduce(function (sum, r) { return sum + (r.status === "fulfilled" ? r.value : 0); }, 0);
-    showToast("成功 " + success + " 失败 " + fail + " 新增 " + totalAdded + " 模型", totalAdded > 0 ? "success" : "warning");
+    updateBatchBar();
+    var summary = summarizeBatchModelResults(results);
+    showToast(summary.text, summary.totalAdded > 0 ? "success" : "warning");
   });
 }
 

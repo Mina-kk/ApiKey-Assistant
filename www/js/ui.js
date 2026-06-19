@@ -14,7 +14,7 @@ function cacheElements() {
     "menuImportBtn", "menuExportBtn", "menuSettingsBtn", "menuSortBtn", "menuBatchBtn",
     "menuClearAllModelsBtn", "menuFetchAllModelsBtn", "menuTestBtn", "menuLogBtn",
     "editorModal", "editorTitle", "closeEditorBtn", "cancelEditorBtn", "saveChannelBtn",
-    "editingId", "nameInput", "typeInput", "groupInput", "baseUrlInput", "copyBaseInEditorBtn",
+    "editingId", "nameInput", "typeInput", "groupInput", "baseUrlInput", "copyBaseInEditorBtn", "modelFetchModeInput",
     "priorityInput", "weightInput", "statusInput", "tagInput", "remarkInput",
     "multiKeyModeInput", "autoBanInput", "keyRows", "addKeyBtn",
     "testModelInput", "modelInput", "addModelBtn", "editModelMappingBtn", "clearEditModelsBtn",
@@ -26,7 +26,7 @@ function cacheElements() {
     "testPromptInput", "startTestBtn", "testResultBox",
     "importModal", "closeImportBtn", "cancelImportBtn", "confirmImportBtn", "readClipboardBtn", "importTextarea",
     "exportModal", "closeExportBtn", "exportCopyBtn",
-    "settingsModal", "closeSettingsBtn", "timeoutInput", "concurrencyInput", "defaultPromptInput", "newApiEnabledInput", "clearAllDataBtn",
+    "settingsModal", "closeSettingsBtn", "timeoutInput", "concurrencyInput", "batchModelTimeoutInput", "defaultPromptInput", "newApiEnabledInput", "clearAllDataBtn",
     "groupModal", "closeGroupBtn", "newGroupInput", "addGroupBtn", "groupManageList",
     "sortModal", "closeSortBtn", "logModal", "closeLogBtn", "copyLogBtn", "clearLogBtn", "logOutput",
     "newApiModal", "closeNewApiBtn", "newApiChannelSelect", "newApiSuffixInput", "newApiModelsInput",
@@ -291,6 +291,7 @@ function openAddEditor() {
     AppState.els.typeInput.value = ChannelType.OpenAI;
     populateGroupSelect(AppState.currentGroup || "default");
     AppState.els.baseUrlInput.value = ChannelBaseURLs[ChannelType.OpenAI];
+    if (AppState.els.modelFetchModeInput) AppState.els.modelFetchModeInput.value = "auto";
     AppState.els.priorityInput.value = 0;
     AppState.els.weightInput.value = 0;
     AppState.els.statusInput.checked = true;
@@ -323,6 +324,7 @@ function openEditEditor(ch) {
   AppState.els.typeInput.value = ch.type;
   populateGroupSelect(ch.group || "default");
   AppState.els.baseUrlInput.value = ch.base_url || "";
+  if (AppState.els.modelFetchModeInput) AppState.els.modelFetchModeInput.value = ch.model_fetch_mode || "auto";
   AppState.els.priorityInput.value = ch.priority != null ? ch.priority : 0;
   AppState.els.weightInput.value = ch.weight != null ? ch.weight : 0;
   AppState.els.statusInput.checked = ch.status !== 0;

@@ -120,7 +120,8 @@ function buildLocalProxyCandidates(targetUrl) {
   ]);
 }
 
-function requestViaLocalProxyOrDirect(method, url, headers, body, timeoutMs, preferProxy, logNetwork) {
+function requestViaLocalProxyOrDirect(method, url, headers, body, timeoutMs, preferProxy, logNetwork, options) {
+  options = options || {};
   var candidates = buildLocalProxyCandidates(url);
   var index = 0;
 
@@ -136,10 +137,10 @@ function requestViaLocalProxyOrDirect(method, url, headers, body, timeoutMs, pre
     return doHttpRequest(method, proxyUrl, h, body, timeoutMs, logNetwork).catch(tryProxy);
   }
 
-  if (preferProxy) return tryProxy();
+  if (preferProxy && !options.disableProxy) return tryProxy();
 
   return doHttpRequest(method, url, headers, body, timeoutMs, logNetwork).catch(function (err) {
-    if (AppState.proxy && AppState.proxy.enabled) return tryProxy(err);
+    if (!options.disableProxy && AppState.proxy && AppState.proxy.enabled) return tryProxy(err);
     return Promise.reject(err);
   });
 }
@@ -147,15 +148,21 @@ function requestViaLocalProxyOrDirect(method, url, headers, body, timeoutMs, pre
 // 模型列表解析
 function parseOpenAILikeModelList(data) {
   var models = [];
+  if (Array.isArray(data)) {
+    data.forEach(function (x) {
+      var v = typeof x === "string" ? x : (x && (x.id || x.name || x.model));
+      if (v) models.push(String(v).trim());
+    });
+  }
   if (Array.isArray(data.data)) {
     data.data.forEach(function (x) {
-      var v = typeof x === "string" ? x : x.id || x.name;
+      var v = typeof x === "string" ? x : x.id || x.name || x.model;
       if (v) models.push(String(v).trim());
     });
   }
   if (Array.isArray(data.models)) {
     data.models.forEach(function (x) {
-      var v = typeof x === "string" ? x : x.id || x.name;
+      var v = typeof x === "string" ? x : x.id || x.name || x.model;
       if (v) models.push(String(v).trim());
     });
   }
@@ -289,8 +296,10 @@ function GenRelayInfo(channel, requestModel) {
 }
 
 // 获取上游模型列表
-function fetchUpstreamModels(channel) {
+function fetchUpstreamModels(channel, options) {
+  options = options || {};
   return new Promise(function (resolve, reject) {
+    var startTime = Date.now();
     var apiType = ChannelTypeToAPIType(channel.type);
     var adaptor = GetAdaptor(apiType);
     var key = getChannelFirstKey(channel);
@@ -299,39 +308,53 @@ function fetchUpstreamModels(channel) {
 
     var url = adaptor.getModelListUrl(channel.base_url, key);
     var headers = adaptor.getModelListHeaders(key);
-    var preferProxy = isOpenCodeZenBase(channel.base_url);
+    var modelFetchMode = options.fetchMode || channel.model_fetch_mode || "auto";
+    if (["auto", "direct", "proxy"].indexOf(modelFetchMode) === -1) modelFetchMode = "auto";
+    var preferProxy = modelFetchMode === "proxy" ? true : isOpenCodeZenBase(channel.base_url);
+    var timeoutMs = options.timeoutMs || (AppState.settings.timeout * 1000);
+    var disableProxy = modelFetchMode === "direct" || !!options.disableProxy;
     if (typeof addLog === "function") addLog("info", "fetchUpstreamModels", {
       channel: channel.name,
       base_url: channel.base_url,
       request_url: String(url).replace(/(key=)[^&]+/ig, "$1***"),
       apiType: apiType,
       preferProxy: preferProxy,
+      disableProxy: disableProxy,
+      modelFetchMode: modelFetchMode,
+      response_time: 0,
+      timeoutMs: timeoutMs,
       hasAndroidBridge: !!(window.AndroidBridge && window.AndroidBridge.httpRequest),
       hasNativeHttp: !!(window.cordova && typeof cordova.exec === "function")
     });
 
     // 特定接口优先使用原生网络通道；普通渠道按默认通道请求。
     var requestPromise;
-    if (preferProxy && window.AndroidBridge && typeof window.AndroidBridge.httpRequest === "function") {
-      requestPromise = doHttpRequest("GET", url, headers, null, AppState.settings.timeout * 1000, true);
+    if (preferProxy && !disableProxy && window.AndroidBridge && typeof window.AndroidBridge.httpRequest === "function") {
+      requestPromise = doHttpRequest("GET", url, headers, null, timeoutMs, true);
     } else {
-      requestPromise = requestViaLocalProxyOrDirect("GET", url, headers, null, AppState.settings.timeout * 1000, preferProxy, true);
+      requestPromise = requestViaLocalProxyOrDirect("GET", url, headers, null, timeoutMs, preferProxy, true, { disableProxy: disableProxy });
     }
 
     requestPromise.then(function (raw) {
       try {
-        if (typeof addLog === "function") addLog("debug", "model raw response", { channel: channel.name, length: String(raw || "").length, sample: String(raw || "").slice(0, 300) });
-        var data = JSON.parse(raw);
+        var cost = Date.now() - startTime;
+        channel.response_time = cost;
+        if (typeof addLog === "function") addLog("debug", "model raw response", { channel: channel.name, response_time: cost, modelFetchMode: modelFetchMode, length: String(raw || "").length, sample: String(raw || "").slice(0, 300) });
+        var text = String(raw || "").trim();
+        if (!text) throw new Error("接口返回为空");
+        var data = JSON.parse(text);
         var models = adaptor.parseModelList(data);
         if (!models.length) {
           reject(new Error(data.error ? JSON.stringify(data.error) : "未解析到模型列表"));
           return;
         }
-        if (typeof addLog === "function") addLog("info", "models fetched", { channel: channel.name, count: models.length });
+        if (typeof addLog === "function") addLog("info", "models fetched", { channel: channel.name, count: models.length, response_time: cost, modelFetchMode: modelFetchMode });
         resolve(models);
-      } catch (e) { if (typeof addLog === "function") addLog("error", "parse model list failed", { channel: channel.name, error: e.message }); reject(e); }
+      } catch (e) { var parseCost = Date.now() - startTime; channel.response_time = parseCost; if (typeof addLog === "function") addLog("error", "parse model list failed", { channel: channel.name, response_time: parseCost, modelFetchMode: modelFetchMode, error: e.message, sample: String(raw || "").slice(0, 300) }); reject(e); }
     }).catch(function (e) {
-      if (typeof addLog === "function") addLog("error", "fetchUpstreamModels failed", { channel: channel.name, error: e.message || String(e) });
+      var failCost = Date.now() - startTime;
+      channel.response_time = failCost;
+      if (typeof addLog === "function") addLog("error", "fetchUpstreamModels failed", { channel: channel.name, response_time: failCost, modelFetchMode: modelFetchMode, error: e.message || String(e) });
       reject(e);
     });
   });
@@ -364,7 +387,9 @@ function testChannel(channel, modelName, prompt) {
 
     requestViaLocalProxyOrDirect("POST", url, headers, JSON.stringify(body), AppState.settings.timeout * 1000, isOpenCodeZenBase(channel.base_url), false).then(function (raw) {
       try {
-        var data = JSON.parse(raw);
+        var text = String(raw || "").trim();
+        if (!text) throw new Error("接口返回为空");
+        var data = JSON.parse(text);
         var reply = adaptor.parseChatResponse(data);
         channel.response_time = Date.now() - startTime;
         channel.test_time = Date.now();
@@ -374,34 +399,55 @@ function testChannel(channel, modelName, prompt) {
   });
 }
 
+function getBatchModelFetchTimeoutMs() {
+  var seconds = Number(AppState.settings.batchModelTimeout || 25) || 25;
+  var maxSeconds = Number(AppState.settings.timeout || 60) || 60;
+  seconds = Math.max(5, Math.min(seconds, maxSeconds));
+  return seconds * 1000;
+}
+
+function promiseWithTimeout(promise, timeoutMs, message) {
+  var timer = null;
+  return new Promise(function (resolve, reject) {
+    timer = setTimeout(function () { reject(new Error(message || "请求超时")); }, timeoutMs);
+    promise.then(resolve).catch(reject).finally(function () { if (timer) clearTimeout(timer); });
+  });
+}
+
 // 批量并发
-function runWithConcurrency(tasks, concurrency) {
+function runWithConcurrency(tasks, concurrency, onProgress) {
   return new Promise(function (resolve) {
-    var results = [];
+    concurrency = Math.max(1, Number(concurrency) || 6);
+    var results = new Array(tasks.length);
     var index = 0;
     var running = 0;
-    var done = false;
+    var finished = 0;
 
     function next() {
-      if (done) return;
-      if (index >= tasks.length && running === 0) {
-        done = true;
+      if (finished >= tasks.length) {
         resolve(results);
         return;
       }
       while (running < concurrency && index < tasks.length) {
-        let i = index++;
-        running++;
-        tasks[i]().then(function (res) {
-          results[i] = { status: "fulfilled", value: res };
-        }).catch(function (err) {
-          results[i] = { status: "rejected", reason: err };
-        }).finally(function () {
-          running--;
-          next();
-        });
+        (function (i) {
+          running++;
+          Promise.resolve().then(tasks[i]).then(function (res) {
+            results[i] = { status: "fulfilled", value: res };
+          }).catch(function (err) {
+            results[i] = { status: "rejected", reason: err };
+          }).finally(function () {
+            running--;
+            finished++;
+            if (typeof onProgress === "function") {
+              try { onProgress(results[i], i, finished, tasks.length); } catch (e) {}
+            }
+            next();
+          });
+        })(index++);
       }
     }
-    next();
+
+    if (!tasks.length) resolve([]);
+    else next();
   });
 }

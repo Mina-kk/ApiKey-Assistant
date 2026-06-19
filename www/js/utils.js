@@ -160,6 +160,7 @@ function normalizeChannel(item) {
     key: rawKeys.join("\n"),
     keys: labeledKeys,
     base_url: baseUrl,
+    model_fetch_mode: ["auto", "direct", "proxy"].indexOf(item.model_fetch_mode || item.modelFetchMode || "auto") !== -1 ? (item.model_fetch_mode || item.modelFetchMode || "auto") : "auto",
     models: uniqueArray(models),
     model_mapping: item.model_mapping || item.modelMapping || null,
     group: item.group || "default",
@@ -300,7 +301,8 @@ function loadSettings() {
 function ensureRuntimeState() {
   if (!AppState.settings) AppState.settings = {};
   if (!AppState.settings.timeout) AppState.settings.timeout = 60;
-  if (!AppState.settings.concurrency) AppState.settings.concurrency = 4;
+  if (!AppState.settings.concurrency) AppState.settings.concurrency = 6;
+  if (!AppState.settings.batchModelTimeout) AppState.settings.batchModelTimeout = 25;
   if (!AppState.settings.defaultPrompt) AppState.settings.defaultPrompt = "用中文简单回复：Hello, who are you?";
   if (!AppState.settings.localProxyUrl) AppState.settings.localProxyUrl = "http://127.0.0.1:9527";
   if (typeof AppState.settings.newApiEnabled !== "boolean") AppState.settings.newApiEnabled = false;

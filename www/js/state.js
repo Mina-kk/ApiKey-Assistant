@@ -243,7 +243,8 @@ var AppState = {
   settings: {
     theme: "dark",
     timeout: 60,
-    concurrency: 4,
+    concurrency: 6,
+    batchModelTimeout: 25,
     defaultPrompt: "用中文简单回复：Hello, who are you?",
     localProxyUrl: "http://127.0.0.1:9527",
     newApiEnabled: false
