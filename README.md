@@ -6,21 +6,34 @@
 
 ```text
 new-api-android/
-├── config.xml          # Cordova 配置
-├── package.json        # 依赖与脚本
-├── res/                # Android 图标与启动图
-├── www/                # 前端源码
-│   ├── index.html      # 页面结构与弹窗入口
-│   ├── css/style.css   # 全局样式、主题、移动端布局
-│   └── js/
-│       ├── state.js    # new-api 常量与全局状态
-│       ├── utils.js    # Channel 标准化、存储、剪贴板、日志等工具
-│       ├── api.js      # Adaptor、HTTP、模型获取、渠道测试
-│       ├── ui.js       # UI 渲染
-│       ├── main.js     # 初始化、事件绑定、业务操作
-│       ├── newapi.js   # NewAPI 模型命名工具
-│       └── app.js      # Android 生命周期与返回键处理
-└── platforms/          # Cordova 生成的 Android 工程
+├── config.xml              # Cordova 配置
+├── package.json            # 依赖与脚本
+├── scripts/
+│   └── sync-version.js     # 版本同步脚本
+├── www/                    # 前端源码
+│   ├── cordova.js          # 浏览器调试占位（真机构建时被 Cordova 覆盖）
+│   ├── index.html          # 页面结构与弹窗入口
+│   ├── images/
+│   │   ├── background.jpg  # 背景图
+│   │   └── icon.jpg        # 应用图标
+│   ├── scripts/
+│   │   ├── app.constants.js  # 常量与全局状态
+│   │   ├── app.utils.js      # Channel 标准化、存储、剪贴板、日志等工具
+│   │   ├── app.api.js        # Adaptor、HTTP、模型获取、渠道测试
+│   │   ├── app.ui.js         # UI 渲染
+│   │   ├── app.main.js       # 初始化、事件绑定、业务操作
+│   │   ├── app.bridge.js     # Android 生命周期与返回键处理
+│   │   └── features/         # 功能模块
+│   │       ├── models.js       # 模型管理
+│   │       ├── model-naming.js # NewAPI 模型命名工具
+│   │       ├── batch.js        # 批量操作
+│   │       ├── token-query.js  # 令牌查询
+│   │       ├── proxy.js        # 本地代理
+│   │       ├── testing.js      # 渠道测试
+│   │       └── app-update.js   # 应用更新
+│   └── styles/
+│       └── main.css        # 全局样式、主题、移动端布局
+└── platforms/              # Cordova 生成的 Android 工程（不纳入版本控制）
 ```
 
 > 日常维护优先修改 `www/` 目录。若没有执行 `cordova prepare android`，需要手动同步到 `platforms/android/app/src/main/assets/www/`，否则 Android 工程内页面不会更新。
@@ -106,23 +119,23 @@ NewAPI 工具用于把当前 app 内渠道模型转换为 NewAPI 常用的模型
 
 ### 新增设置项
 
-1. 在 `www/js/state.js` 的 `AppState.settings` 增加默认值。
-2. 在 `www/js/utils.js` 的 `ensureRuntimeState()` 里补默认值，兼容旧数据。
+1. 在 `www/scripts/app.constants.js` 的 `AppState.settings` 增加默认值。
+2. 在 `www/scripts/app.utils.js` 的 `ensureRuntimeState()` 里补默认值，兼容旧数据。
 3. 在 `www/index.html` 增加设置 UI。
-4. 在 `www/js/ui.js` 的 `cacheElements()` 中缓存元素 ID。
-5. 在 `www/js/main.js` 或独立功能文件中绑定事件并调用 `saveSettings()`。
+4. 在 `www/scripts/app.ui.js` 的 `cacheElements()` 中缓存元素 ID。
+5. 在 `www/scripts/app.main.js` 或独立功能文件中绑定事件并调用 `saveSettings()`。
 
 ### 新增弹窗功能
 
 1. 在 `www/index.html` 增加 `.modal-mask` 结构。
-2. 在 `www/js/ui.js` 缓存弹窗相关 ID。
-3. 在 `www/js/utils.js` 的 `closeAllModals()` 中加入弹窗 ID。
-4. Android 返回键如需关闭该弹窗，也要在 `www/js/app.js` 的弹窗列表中加入 ID。
-5. 复杂功能建议单独放在 `www/js/<feature>.js`，并在 `index.html` 中于 `main.js` 后引入。
+2. 在 `www/scripts/app.ui.js` 缓存弹窗相关 ID。
+3. 在 `www/scripts/app.utils.js` 的 `closeAllModals()` 中加入弹窗 ID。
+4. Android 返回键如需关闭该弹窗，也要在 `www/scripts/app.bridge.js` 的弹窗列表中加入 ID。
+5. 复杂功能建议单独放在 `www/scripts/features/<feature>.js`，并在 `index.html` 中于 `app.main.js` 后引入。
 
 ### 样式约定
 
-- 使用 CSS 变量：`--bg`、`--surface`、`--panel`、`--border`、`--text`、`--primary` 等。
+- 样式文件位于 `www/styles/main.css`，使用 CSS 变量：`--bg`、`--surface`、`--panel`、`--border`、`--text`、`--primary` 等。
 - 复用现有按钮类：`primary-btn`、`ghost-btn`、`small-btn`、`danger-btn`。
 - 移动端布局优先，避免固定大宽度。
 - 文本可能很长的位置需要加：
@@ -137,7 +150,7 @@ white-space: nowrap;
 ### 代码注释约定
 
 - 只保留功能提示类注释。
-- 不写流水账注释，例如“点击按钮”“设置变量”等。
+- 不写流水账注释，例如"点击按钮""设置变量"等。
 - 新功能模块顶部可以保留一行功能名称注释。
 - 复杂兼容逻辑可保留必要说明。
 
@@ -146,6 +159,7 @@ white-space: nowrap;
 
 | 版本 | 日期 | 说明 |
 |------|------|------|
+| v4.0.0 | 2026-06-21 | **架构重构**：目录结构全面重组，JS 按职责拆分至 `www/scripts/` + `www/scripts/features/`，样式移至 `www/styles/`，图片移至 `www/images/`，移除 `res/`、`hooks/`、`merges/` 等旧目录 |
 | v3.0.6 | 2026-06-20 | 新增令牌查询功能、堆叠柱状图优化、URL 默认隐藏、模型调用记录表、图例点击划线隐藏、修复关于页版本显示 |
 | v3.0.5 | - | 优化与修复 |
 | v3.0.4 | - | 优化与修复 |
