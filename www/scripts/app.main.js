@@ -234,8 +234,13 @@ function closeDrawer() {
 }
 
 function toggleSearchPanel() {
-  AppState.els.searchPanel.classList.toggle("active");
-  if (AppState.els.searchPanel.classList.contains("active")) {
+  var panel = AppState.els.searchPanel;
+  if (panel.classList.contains("active")) {
+    panel.classList.remove("active");
+    AppState.els.searchInput.value = "";
+    renderCards();
+  } else {
+    panel.classList.add("active");
     AppState.els.searchInput.focus();
   }
 }
@@ -500,41 +505,6 @@ function fetchModelsForCard(ch) {
   }).catch(function (err) { showToast(err.message, "error"); });
 }
 
-function openTestModal() {
-  refreshTestSelects();
-  AppState.els.testPromptInput.value = AppState.settings.defaultPrompt;
-  AppState.els.testResultBox.textContent = "暂无结果";
-  openModal(AppState.els.testModal);
-}
-
-function runChatTest() {
-  var keyValue = AppState.els.testKeySelect.value;
-  var model = AppState.els.testModelSelect.value;
-  var prompt = AppState.els.testPromptInput.value.trim();
-  if (!keyValue) { showToast("请选择 API Key", "error"); return; }
-
-  var parts = keyValue.split("::");
-  var channelId = parts[0];
-  var keyId = parts[1];
-  var ch = AppState.channels.find(function (c) { return c.id === channelId; });
-  var key = (ch && ch.keys ? ch.keys : []).find(function (k) { return k.id === keyId; });
-  if (!ch || !key) { showToast("API Key 不存在", "error"); return; }
-
-  var testCh = JSON.parse(JSON.stringify(ch));
-  testCh.keys = [key];
-  testCh.key = key.value;
-
-  AppState.els.testResultBox.textContent = "正在测试...";
-  testChannel(testCh, model, prompt).then(function (reply) {
-    AppState.els.testResultBox.textContent = reply;
-    ch.response_time = testCh.response_time;
-    ch.test_time = testCh.test_time;
-    saveChannels();
-  }).catch(function (err) {
-    AppState.els.testResultBox.textContent = "测试失败：\n" + err.message;
-  });
-}
-
 function importChannels() {
   try {
     var raw = AppState.els.importTextarea.value.trim();
@@ -581,153 +551,7 @@ function clearAllData() {
   showToast("已清除所有数据", "success");
 }
 
-function clearAllModels() {
-  if (!AppState.channels.length) { showToast("暂无渠道", "warning"); return; }
-  if (!confirm("确定清空所有渠道中的模型列表？")) return;
-  AppState.channels.forEach(function (ch) { ch.models = []; ch.updated_time = Date.now(); });
-  AppState.expandedModels = {};
-  saveChannels();
-  renderAll();
-  showToast("已清空所有模型", "success");
-}
-
-
-function confirmBatchModelFetch(count) {
-  return confirm("准备批量获取 " + count + " 个渠道的模型。\n\n提醒：批量获取模型时请尽量关闭代理/VPN，挂着代理可能导致部分渠道获取不到模型结果。\n\n已为批量获取启用并发和单渠道超时，慢渠道不会阻塞其它渠道。是否继续？");
-}
-
-function buildFetchModelsTasks(channels) {
-  var timeoutMs = getBatchModelFetchTimeoutMs();
-  return channels.map(function (ch) {
-    return function () {
-      if (!getChannelFirstKey(ch)) return Promise.reject(new Error("无 Key"));
-      var oldCount = uniqueArray(ch.models || []).length;
-      return fetchUpstreamModels(ch, { timeoutMs: timeoutMs }).then(function (models) {
-        ch.models = uniqueArray((ch.models || []).concat(models));
-        ch.updated_time = Date.now();
-        return Math.max(0, ch.models.length - oldCount);
-      });
-    };
-  });
-}
-
-function summarizeBatchModelResults(results) {
-  var success = results.filter(function (r) { return r && r.status === "fulfilled"; }).length;
-  var fail = results.length - success;
-  var totalAdded = results.reduce(function (sum, r) { return sum + (r && r.status === "fulfilled" ? r.value : 0); }, 0);
-  var failSamples = results.map(function (r, i) {
-    if (!r || r.status !== "rejected") return "";
-    var msg = r.reason && r.reason.message ? r.reason.message : String(r.reason || "失败");
-    return "#" + (i + 1) + " " + msg;
-  }).filter(Boolean).slice(0, 3);
-  var text = "成功 " + success + " 失败 " + fail + " 新增 " + totalAdded + " 模型";
-  if (failSamples.length) text += "；失败示例：" + failSamples.join("；");
-  return { success: success, fail: fail, totalAdded: totalAdded, text: text };
-}
-
-function fetchAllModels() {
-  if (!AppState.channels.length) { showToast("暂无渠道", "warning"); return; }
-  if (!confirmBatchModelFetch(AppState.channels.length)) return;
-  var concurrency = Math.max(1, Number(AppState.settings.concurrency) || 6);
-  var timeoutSec = Math.round(getBatchModelFetchTimeoutMs() / 1000);
-  showToast("开始并发获取模型：并发 " + concurrency + "，单渠道超时 " + timeoutSec + " 秒", "info");
-  var tasks = buildFetchModelsTasks(AppState.channels);
-  runWithConcurrency(tasks, concurrency, function (result, index, finished, total) {
-    if (finished === total || finished % 3 === 0) showToast("批量获取进度 " + finished + "/" + total, "info");
-  }).then(function (results) {
-    saveChannels();
-    renderAll();
-    var summary = summarizeBatchModelResults(results);
-    showToast(summary.text, summary.totalAdded > 0 ? "success" : "warning");
-  });
-}
-
 // 批量操作
-function enableBatchMode() {
-  AppState.batchMode = true;
-  AppState.selectedChannels = {};
-  AppState.els.batchBar.classList.add("active");
-  AppState.els.addBtn.style.display = "none";
-  populateBatchGroupSelect();
-  updateBatchBar();
-  renderCards();
-}
-
-function disableBatchMode() {
-  AppState.batchMode = false;
-  AppState.selectedChannels = {};
-  AppState.els.batchBar.classList.remove("active");
-  AppState.els.addBtn.style.display = "";
-  renderCards();
-}
-
-function updateBatchBar() {
-  var filtered = getFilteredChannels();
-  var selectedCount = filtered.filter(function (ch) { return AppState.selectedChannels[ch.id]; }).length;
-  AppState.els.batchCount.textContent = "已选 " + selectedCount + " 项";
-  AppState.els.batchSelectAll.checked = filtered.length > 0 && selectedCount === filtered.length;
-}
-
-function batchSetStatus(status) {
-  var ids = getSelectedIds();
-  if (!ids.length) { showToast("未选择任何渠道", "warning"); return; }
-  AppState.channels.forEach(function (ch) { if (ids.indexOf(ch.id) !== -1) ch.status = status; });
-  saveChannels();
-  renderCards();
-  showToast(status === 1 ? "已启用" : "已禁用", "success");
-}
-
-function batchMoveToGroup() {
-  var ids = getSelectedIds();
-  if (!ids.length) { showToast("未选择任何渠道", "warning"); return; }
-  var group = AppState.els.batchGroupSelect.value || "default";
-  ensureGroupExists(group);
-  AppState.channels.forEach(function (ch) {
-    if (ids.indexOf(ch.id) !== -1) {
-      ch.group = group;
-      ch.updated_time = Date.now();
-    }
-  });
-  saveChannels();
-  renderAll();
-  updateBatchBar();
-  showToast("已移动到 " + group, "success");
-}
-
-function batchDelete() {
-  var ids = getSelectedIds();
-  if (!ids.length) { showToast("未选择任何渠道", "warning"); return; }
-  if (!confirm("确定删除所选 " + ids.length + " 个渠道？")) return;
-  AppState.channels = AppState.channels.filter(function (ch) { return ids.indexOf(ch.id) === -1; });
-  ids.forEach(function (id) { delete AppState.expandedModels[id]; delete AppState.selectedChannels[id]; });
-  saveChannels();
-  renderAll();
-  showToast("已删除 " + ids.length + " 个渠道", "success");
-}
-
-function batchFetchModels() {
-  var ids = getSelectedIds();
-  if (!ids.length) { showToast("未选择任何渠道", "warning"); return; }
-  var selectedChannels = AppState.channels.filter(function (ch) { return ids.indexOf(ch.id) !== -1; });
-  if (!confirmBatchModelFetch(selectedChannels.length)) return;
-  var concurrency = Math.max(1, Number(AppState.settings.concurrency) || 6);
-  var timeoutSec = Math.round(getBatchModelFetchTimeoutMs() / 1000);
-  showToast("开始并发获取模型：并发 " + concurrency + "，单渠道超时 " + timeoutSec + " 秒", "info");
-  var tasks = buildFetchModelsTasks(selectedChannels);
-  runWithConcurrency(tasks, concurrency, function (result, index, finished, total) {
-    if (finished === total || finished % 3 === 0) showToast("批量获取进度 " + finished + "/" + total, "info");
-  }).then(function (results) {
-    saveChannels();
-    renderAll();
-    updateBatchBar();
-    var summary = summarizeBatchModelResults(results);
-    showToast(summary.text, summary.totalAdded > 0 ? "success" : "warning");
-  });
-}
-
-function getSelectedIds() {
-  return Object.keys(AppState.selectedChannels).filter(function (id) { return AppState.selectedChannels[id]; });
-}
 
 // 分组管理
 function addNewGroup() {
@@ -777,71 +601,3 @@ function handleGroupManageAction(e) {
 }
 
 // 代理检测：定时刷新本地代理状态与延迟
-function startProxyMonitor() {
-  stopProxyMonitor();
-  checkProxyLatency();
-  AppState.proxy.timer = setInterval(checkProxyLatency, 3000);
-}
-
-function stopProxyMonitor() {
-  if (AppState.proxy && AppState.proxy.timer) {
-    clearInterval(AppState.proxy.timer);
-    AppState.proxy.timer = null;
-  }
-}
-
-function checkProxyLatency() {
-  var proxyUrl = normalizeBaseUrl(AppState.settings.localProxyUrl || "http://127.0.0.1:9527");
-  var start = Date.now();
-  var targets = [
-    proxyUrl + "/health",
-    proxyUrl + "/ping",
-    proxyUrl + "/"
-  ];
-  var index = 0;
-
-  function tryNext() {
-    if (index >= targets.length) {
-      AppState.proxy.enabled = false;
-      AppState.proxy.latency = null;
-      AppState.proxy.lastChecked = Date.now();
-      AppState.proxy.error = "未开启本地代理";
-      renderProxyStatus();
-      return;
-    }
-    var url = targets[index++];
-    doHttpRequest("GET", url, {}, null, 1800).then(function () {
-      AppState.proxy.enabled = true;
-      AppState.proxy.latency = Date.now() - start;
-      AppState.proxy.lastChecked = Date.now();
-      AppState.proxy.error = "";
-      if (typeof addLog === "function") addLog("debug", "proxy health ok", { url: url, latency: AppState.proxy.latency });
-      renderProxyStatus();
-    }).catch(function (e) {
-      if (typeof addLog === "function") addLog("debug", "proxy health failed", { url: url, error: e.message || String(e) });
-      tryNext();
-    });
-  }
-
-  tryNext();
-}
-
-function renderProxyStatus() {
-  var bar = AppState.els.proxyStatusBar;
-  var text = AppState.els.proxyStatusText;
-  var latency = AppState.els.proxyLatencyText;
-  if (!bar || !text || !latency) return;
-
-  bar.classList.remove("ok", "error");
-  if (AppState.proxy.enabled) {
-    bar.classList.add("ok");
-    var proxyUrl = normalizeBaseUrl(AppState.settings.localProxyUrl || "http://127.0.0.1:9527");
-    text.innerHTML = '<span class="proxy-dot"></span><span class="proxy-title">本地代理已开启</span><span class="proxy-url">' + escapeHtml(proxyUrl.replace(/^https?:\/\//i, "")) + '</span>';
-    latency.innerHTML = '<span class="proxy-latency-label">延迟</span><strong>' + escapeHtml(String(AppState.proxy.latency)) + 'ms</strong>';
-  } else {
-    bar.classList.add("error");
-    var failedProxyUrl = normalizeBaseUrl(AppState.settings.localProxyUrl || "http://127.0.0.1:9527");
-    text.innerHTML = '<span class="proxy-dot"></span><span class="proxy-title">本地代理未开启</span><span class="proxy-url">' + escapeHtml(failedProxyUrl.replace(/^https?:\/\//i, "")) + '</span>';
-    latency.innerHTML = '<span class="proxy-latency-label">延迟</span><strong>--</strong>';
-  }
-}

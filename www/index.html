@@ -7,9 +7,10 @@
   <meta name="theme-color" content="#070812" />
   <meta name="color-scheme" content="dark" />
   <title>ApiKey助手</title>
-  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./styles/main.css" />
 </head>
 <body class="dark">
+<script>(function(){try{var t=localStorage.getItem("new_api_theme_v3");if(!t)try{var s=JSON.parse(localStorage.getItem("new_api_settings_v3")||"{}");t=s&&s.theme}catch(e){}if(t){var l=t==="light"||(t==="auto"&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches);if(l)document.body.classList.add("light")}}catch(e){}})();</script>
   <div class="app-shell">
     <!-- 状态栏占位 -->
     <div class="status-bar-spacer"></div>
@@ -26,8 +27,8 @@
         <button class="icon-btn" id="themeBtn" type="button" aria-label="主题">🌙</button>
         <button class="icon-btn newapi-entry-btn" id="newApiEntryBtn" type="button" aria-label="NewAPI" title="NewAPI" style="display:none">N</button>
         <div class="dropdown-menu" id="newApiDropdown" style="display:none">
-          <button class="menu-item" id="newApiModelNamingBtn" type="button">📝 模型命名</button>
-          <button class="menu-item" id="newApiTokenQueryBtn" type="button">🔑 令牌查询</button>
+          <button class="menu-item" id="newApiModelNamingBtn" type="button">📝 模型重命名</button>
+          <button class="menu-item" id="newApiTokenQueryBtn" type="button">📊 用量监控</button>
         </div>
         <button class="icon-btn" id="moreBtn" type="button" aria-label="更多">⋮</button>
       </div>
@@ -53,7 +54,7 @@
       </div>
       <div class="stat-item">
         <span class="stat-value" id="totalGroups">0</span>
-        <span class="stat-label">分组</span>
+        <span class="stat-label">所属分组管理</span>
       </div>
       <div class="stat-item">
         <span class="stat-value" id="totalKeys">0</span>
@@ -65,16 +66,16 @@
       </div>
     </section>
 
-    <!-- 批量操作栏 -->
+    <!-- 批量管理栏 -->
     <section class="batch-bar" id="batchBar">
       <div class="batch-info">
         <input type="checkbox" id="batchSelectAll" />
-        <label for="batchSelectAll">全选</label>
+        <label for="batchSelectAll">全选本页</label>
         <span id="batchCount">已选 0 项</span>
       </div>
       <div class="batch-actions">
         <select id="batchGroupSelect"></select>
-        <button class="small-btn" id="batchMoveGroupBtn" type="button">移动分组</button>
+        <button class="small-btn" id="batchMoveGroupBtn" type="button">移动所属分组管理</button>
         <button class="small-btn" id="batchEnableBtn" type="button">启用</button>
         <button class="small-btn" id="batchDisableBtn" type="button">禁用</button>
         <button class="small-btn" id="batchFetchModelsBtn" type="button">获取模型</button>
@@ -86,57 +87,57 @@
     <!-- 主内容 -->
     <main id="cardsContainer" class="cards-container"></main>
 
-    <!-- 分组抽屉 -->
+    <!-- 所属分组管理抽屉 -->
     <div class="drawer-mask" id="drawerMask"></div>
     <aside class="drawer" id="drawer">
       <div class="drawer-header">
-        <h2>分组</h2>
+        <h2>所属分组管理</h2>
         <button class="icon-btn" id="closeDrawerBtn" type="button">×</button>
       </div>
       <div class="drawer-body">
         <div class="group-list" id="groupList"></div>
-        <button class="primary-btn" id="manageGroupsBtn" type="button" style="margin-top:16px;width:100%">管理分组</button>
+        <button class="primary-btn" id="manageGroupsBtn" type="button" style="margin-top:16px;width:100%">编辑所属分组管理</button>
       </div>
     </aside>
 
     <!-- 更多菜单 -->
     <div class="dropdown-menu" id="moreMenu">
-      <button class="menu-item" id="menuImportBtn" type="button">📥 导入</button>
-      <button class="menu-item" id="menuExportBtn" type="button">📤 导出</button>
-      <button class="menu-item" id="menuSettingsBtn" type="button">⚙️ 设置</button>
-      <button class="menu-item" id="menuSortBtn" type="button">⇅ 排序</button>
-      <button class="menu-item" id="menuBatchBtn" type="button">☰ 批量操作</button>
-      <button class="menu-item" id="menuClearAllModelsBtn" type="button">🗑 清空模型</button>
-      <button class="menu-item" id="menuFetchAllModelsBtn" type="button">🚀 批量获取模型</button>
-      <button class="menu-item" id="menuTestBtn" type="button">🧪 模型测试</button>
-      <button class="menu-item" id="menuUpdateBtn" type="button">⬆️ 检查更新</button>
-      <button class="menu-item" id="menuAboutBtn" type="button">ℹ️ 关于</button>
-      <button class="menu-item" id="menuLogBtn" type="button">📋 日志</button>
+      <button class="menu-item" id="menuImportBtn" type="button">📥 导入数据</button>
+      <button class="menu-item" id="menuExportBtn" type="button">📤 导出数据</button>
+      <button class="menu-item" id="menuSettingsBtn" type="button">⚙️ 系统设置</button>
+      <button class="menu-item" id="menuSortBtn" type="button">⇅ 排序方式</button>
+      <button class="menu-item" id="menuBatchBtn" type="button">☰ 批量管理</button>
+      <button class="menu-item" id="menuClearAllModelsBtn" type="button">🗑 清空列表</button>
+      <button class="menu-item" id="menuFetchAllModelsBtn" type="button">🚀 批量同步</button>
+      <button class="menu-item" id="menuTestBtn" type="button">🧪 模型诊断</button>
+      <button class="menu-item" id="menuUpdateBtn" type="button">⬆️ 版本更新</button>
+      <button class="menu-item" id="menuAboutBtn" type="button">ℹ️ 关于应用</button>
+      <button class="menu-item" id="menuLogBtn" type="button">📋 运行日志</button>
     </div>
 
     <!-- 渠道编辑弹窗 -->
     <div class="modal-mask" id="editorModal">
       <div class="modal modal-fullscreen">
         <div class="modal-header">
-          <h2 id="editorTitle">新增渠道</h2>
+          <h2 id="editorTitle">新建渠道</h2>
           <button class="icon-btn close-btn" id="closeEditorBtn" type="button">×</button>
         </div>
         <div class="modal-body">
           <input id="editingId" type="hidden" />
 
           <div class="form-section">
-            <h3>基本信息</h3>
+            <h3>基础配置</h3>
             <div class="form-group">
-              <label>名称 <span>*</span></label>
+              <label>渠道名称 <span>*</span></label>
               <input id="nameInput" type="text" placeholder="例如：OpenAI 官方" />
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label>类型 <span>*</span></label>
+                <label>服务类型 <span>*</span></label>
                 <select id="typeInput"></select>
               </div>
               <div class="form-group">
-                <label>分组</label>
+                <label>所属分组管理</label>
                 <select id="groupInput"></select>
               </div>
             </div>
@@ -148,13 +149,13 @@
               </div>
             </div>
             <div class="form-group">
-              <label>模型获取方式</label>
+              <label>模型拉取方式</label>
               <select id="modelFetchModeInput">
-                <option value="auto">自动选择</option>
-                <option value="direct">直接获取</option>
-                <option value="proxy">本地代理</option>
+                <option value="auto">自动模式</option>
+                <option value="direct">直连拉取</option>
+                <option value="proxy">本地中转</option>
               </select>
-              <small class="field-help">获取不到模型时可切换直接获取或本地代理。</small>
+              <small class="field-help">获取不到模型时可切换直连拉取或本地中转。</small>
             </div>
             <div class="form-row">
               <div class="form-group">
@@ -174,12 +175,12 @@
               </div>
             </div>
             <div class="form-group">
-              <label>标签</label>
-              <input id="tagInput" type="text" placeholder="多个标签用逗号分隔" />
+              <label>渠道标签</label>
+              <input id="tagInput" type="text" placeholder="多个渠道标签用逗号分隔" />
             </div>
             <div class="form-group">
-              <label>备注</label>
-              <input id="remarkInput" type="text" placeholder="渠道备注" />
+              <label>渠道备注</label>
+              <input id="remarkInput" type="text" placeholder="渠道渠道备注" />
             </div>
           </div>
 
@@ -187,15 +188,15 @@
             <h3>API Key</h3>
             <div class="form-row">
               <div class="form-group">
-                <label>多 Key 模式</label>
+                <label>密钥轮换</label>
                 <select id="multiKeyModeInput">
-                  <option value="0">单 Key</option>
-                  <option value="1">轮询</option>
-                  <option value="2">随机</option>
+                  <option value="0">单一密钥</option>
+                  <option value="1">顺序轮换</option>
+                  <option value="2">随机轮换</option>
                 </select>
               </div>
               <div class="form-group">
-                <label>自动禁用</label>
+                <label>自动停用</label>
                 <label class="switch">
                   <input id="autoBanInput" type="checkbox" checked />
                   <span class="slider"></span>
@@ -205,7 +206,7 @@
             <div class="form-group">
               <div class="row-title">
                 <label>Key 列表 <span>*</span></label>
-                <button class="small-btn" id="addKeyBtn" type="button">添加 Key</button>
+                <button class="small-btn" id="addKeyBtn" type="button">新增密钥</button>
               </div>
               <div id="keyRows" class="key-rows"></div>
             </div>
@@ -214,15 +215,15 @@
           <div class="form-section">
             <h3>模型</h3>
             <div class="form-group">
-              <label>测试模型</label>
+              <label>诊断模型</label>
               <input id="testModelInput" type="text" placeholder="测试时使用的模型，留空取第一个" />
             </div>
             <div class="form-group">
               <div class="row-title">
-                <label>模型列表</label>
+                <label>已配模型</label>
                 <div class="mini-actions">
                   <button class="small-btn" id="addModelBtn" type="button">添加</button>
-                  <button class="small-btn" id="editModelMappingBtn" type="button">模型映射</button>
+                  <button class="small-btn" id="editModelMappingBtn" type="button">模型重定向</button>
                   <button class="danger-btn small-btn" id="clearEditModelsBtn" type="button">清空</button>
                 </div>
               </div>
@@ -232,17 +233,17 @@
           </div>
 
           <div class="form-section">
-            <h3>高级</h3>
+            <h3>高级配置</h3>
             <div class="form-group">
-              <label>参数覆盖 (JSON)</label>
+              <label>参数重写 (JSON)</label>
               <textarea id="paramOverrideInput" rows="2" placeholder='{"temperature": 0.5}'></textarea>
             </div>
             <div class="form-group">
-              <label>请求头覆盖 (JSON)</label>
+              <label>请求头重写 (JSON)</label>
               <textarea id="headerOverrideInput" rows="2" placeholder='{"X-Custom": "value"}'></textarea>
             </div>
             <div class="form-group">
-              <label>其他设置 (JSON)</label>
+              <label>扩展配置 (JSON)</label>
               <textarea id="otherSettingsInput" rows="2" placeholder='{"azure_version":"2024-12-01-preview"}'></textarea>
             </div>
           </div>
@@ -252,16 +253,16 @@
         <div class="modal-footer">
           <button class="ghost-btn" id="fetchModelsInEditorBtn" type="button">获取模型</button>
           <button class="ghost-btn" id="cancelEditorBtn" type="button">取消</button>
-          <button class="primary-btn" id="saveChannelBtn" type="button">保存</button>
+          <button class="primary-btn" id="saveChannelBtn" type="button">保存端点</button>
         </div>
       </div>
     </div>
 
-    <!-- 模型映射弹窗 -->
+    <!-- 模型重定向弹窗 -->
     <div class="modal-mask" id="modelMappingModal">
       <div class="modal">
         <div class="modal-header">
-          <h2>模型映射</h2>
+          <h2>模型重定向</h2>
           <button class="icon-btn close-btn" id="closeModelMappingBtn" type="button">×</button>
         </div>
         <div class="modal-body">
@@ -271,7 +272,7 @@
         </div>
         <div class="modal-footer">
           <button class="ghost-btn" id="cancelModelMappingBtn" type="button">取消</button>
-          <button class="primary-btn" id="saveModelMappingBtn" type="button">保存</button>
+          <button class="primary-btn" id="saveModelMappingBtn" type="button">保存端点</button>
         </div>
       </div>
     </div>
@@ -280,11 +281,11 @@
     <div class="modal-mask" id="tokenQueryModal">
       <div class="modal">
         <div class="modal-header">
-          <h2>🔑 令牌查询</h2>
+          <h2>📊 API 用量仪表盘</h2>
           <button class="icon-btn close-btn" id="tqCloseBtn" type="button">×</button>
         </div>
         <div class="modal-body">
-          <div class="tip-box">仅支持 NewAPI 中转站的令牌查询。从下方渠道选择自动填入服务器地址（渠道 URL 后缀 /v1 等会自动去除），或手动输入。多 Key 渠道会逐行列出，选择后自动填入服务器地址和令牌。</div>
+          <div class="tip-box">查询 NewAPI 中转站的令牌用量数据。从下方渠道选择自动填入端点地址和服务令牌，或手动输入后点击「查询」查看图表与记录。</div>
           <div class="tq-input-row">
             <div class="form-group">
               <label>选择渠道</label>
@@ -292,18 +293,27 @@
                 <option value="">-- 手动输入 --</option>
               </select>
             </div>
+            <div class="tq-endpoint-row">
+              <div class="form-group" style="flex:1;min-width:0">
+                <label>已保存端点</label>
+                <select id="tqSavedEndpoints">
+                  <option value="">-- 选择已保存端点 --</option>
+                </select>
+              </div>
+              <button class="small-btn" id="tqDeleteEndpointBtn" type="button" style="margin-top:22px">删除</button>
+            </div>
           </div>
           <div class="tq-input-row">
             <div class="form-group">
-              <label>NewAPI 服务器地址 <span>*</span></label>
+              <label>服务端点 <span>*</span></label>
               <div class="inline-input">
                 <input id="tqServerUrlInput" type="password" placeholder="https://your-server.com" />
                 <button class="small-btn" id="tqUrlToggleBtn" type="button">👁</button>
-                <button class="small-btn" id="tqSaveUrlBtn" type="button">保存</button>
+                <button class="small-btn" id="tqSaveUrlBtn" type="button">保存端点</button>
               </div>
             </div>
             <div class="form-group">
-              <label>API 令牌 <span>*</span></label>
+              <label>认证令牌 <span>*</span></label>
               <input id="tqApiKeyInput" type="password" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
             </div>
           </div>
@@ -311,7 +321,7 @@
             <button class="primary-btn" id="tqQueryBtn" type="button">🔍 查询</button>
           </div>
           <div id="tqResultArea" class="tq-result-area">
-            <div class="tq-placeholder">选择渠道或输入服务器地址和令牌，点击"查询"查看使用统计与图表</div>
+            <div class="tq-placeholder">选择渠道或输入服务器地址和令牌，点击"查询"查看用量统计与图表</div>
           </div>
         </div>
         <div class="modal-footer">
@@ -324,7 +334,7 @@
     <div class="modal-mask" id="testModal">
       <div class="modal">
         <div class="modal-header">
-          <h2>模型测试</h2>
+          <h2>模型诊断</h2>
           <button class="icon-btn close-btn" id="closeTestBtn" type="button">×</button>
         </div>
         <div class="modal-body">
@@ -358,7 +368,7 @@
     <div class="modal-mask" id="importModal">
       <div class="modal small-modal">
         <div class="modal-header">
-          <h2>导入 JSON</h2>
+          <h2>导入配置</h2>
           <button class="icon-btn close-btn" id="closeImportBtn" type="button">×</button>
         </div>
         <div class="modal-body">
@@ -368,9 +378,9 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="ghost-btn" id="readClipboardBtn" type="button">读取剪贴板</button>
+          <button class="ghost-btn" id="readClipboardBtn" type="button">从剪贴板读取</button>
           <button class="ghost-btn" id="cancelImportBtn" type="button">取消</button>
-          <button class="primary-btn" id="confirmImportBtn" type="button">确认导入</button>
+          <button class="primary-btn" id="confirmImportBtn" type="button">导入</button>
         </div>
       </div>
     </div>
@@ -426,8 +436,8 @@
           </div>
           <div class="form-group switch-row">
             <div>
-              <label>NewAPI 模型命名工具</label>
-              <p class="setting-desc">开启后会在顶部搜索、主题按钮右侧显示 NewAPI 入口。</p>
+              <label>NewAPI 功能</label>
+              <p class="setting-desc">开启后顶部导航栏显示 NewAPI 工具入口（模型重命名 + 用量监控）。</p>
             </div>
             <label class="switch">
               <input id="newApiEnabledInput" type="checkbox" />
@@ -439,17 +449,17 @@
       </div>
     </div>
 
-    <!-- 分组管理弹窗 -->
+    <!-- 所属分组管理管理弹窗 -->
     <div class="modal-mask" id="groupModal">
       <div class="modal">
         <div class="modal-header">
-          <h2>管理分组</h2>
+          <h2>编辑所属分组管理</h2>
           <button class="icon-btn close-btn" id="closeGroupBtn" type="button">×</button>
         </div>
         <div class="modal-body">
           <div class="form-group">
             <div class="inline-input">
-              <input id="newGroupInput" type="text" placeholder="新分组名称" />
+              <input id="newGroupInput" type="text" placeholder="新所属分组管理名称" />
               <button class="small-btn" id="addGroupBtn" type="button">添加</button>
             </div>
           </div>
@@ -505,7 +515,7 @@
     <div class="modal-mask" id="updateModal">
       <div class="modal small-modal">
         <div class="modal-header">
-          <h2>检查更新</h2>
+          <h2>版本更新</h2>
           <button class="icon-btn close-btn" id="closeUpdateBtn" type="button">×</button>
         </div>
         <div class="modal-body">
@@ -526,32 +536,32 @@
     <div class="modal-mask" id="aboutModal">
       <div class="modal small-modal">
         <div class="modal-header">
-          <h2>关于 ApiKey助手</h2>
+          <h2>关于应用</h2>
           <button class="icon-btn close-btn" id="closeAboutBtn" type="button">×</button>
         </div>
         <div class="modal-body about-body">
           <div class="about-hero">
             <strong>ApiKey助手</strong>
-            <span id="aboutVersionText">当前版本：3.0.6</span>
+            <span id="aboutVersionText">当前版本：3.0.61</span>
           </div>
           <div class="form-section">
             <h3>软件功能</h3>
             <ul class="about-list">
               <li>集中保存和管理多个 AI 服务渠道、Base URL 与 API Key。</li>
               <li>支持 OpenAI、Claude、Gemini、DeepSeek、硅基流动、OpenRouter 等多种兼容渠道。</li>
-              <li>可分组、搜索、排序、批量启用/禁用、批量获取模型。</li>
-              <li>支持模型列表管理、模型映射、NewAPI 模型命名工具。</li>
+              <li>可所属分组管理、搜索、排序、批量启用/禁用、批量获取模型。</li>
+              <li>支持已配模型管理、模型重定向、NewAPI 工具。</li>
               <li>提供模型连通性测试、导入/导出 JSON、复制 Key/配置等常用操作。</li>
             </ul>
           </div>
           <div class="form-section">
             <h3>简单用法</h3>
             <ol class="about-list">
-              <li>点击右下角 <b>+</b> 新增渠道。</li>
+              <li>点击右下角 <b>+</b> 新建渠道。</li>
               <li>填写名称、服务类型、Base URL 和 API Key。</li>
-              <li>点击“获取模型”拉取模型列表，也可手动添加模型。</li>
-              <li>在卡片中复制 Key、复制配置，或进入“模型测试”验证可用性。</li>
-              <li>用左侧分组抽屉整理渠道；更多菜单里可导入、导出、批量操作。</li>
+              <li>点击“获取模型”拉取已配模型，也可手动添加模型。</li>
+              <li>在卡片中复制 Key、复制配置，或进入“模型诊断”验证可用性。</li>
+              <li>用左侧所属分组管理抽屉整理渠道；更多菜单里可导入、导出、批量管理。</li>
             </ol>
           </div>
           <div class="form-section">
@@ -567,11 +577,11 @@
       </div>
     </div>
 
-    <!-- NewAPI 模型命名工具弹窗 -->
+    <!-- NewAPI 模型重命名弹窗 -->
     <div class="modal-mask" id="newApiModal">
       <div class="modal modal-fullscreen">
         <div class="modal-header">
-          <h2>NewAPI 模型命名工具</h2>
+          <h2>NewAPI 模型重命名</h2>
           <button class="icon-btn close-btn" id="closeNewApiBtn" type="button">×</button>
         </div>
         <div class="modal-body">
@@ -590,7 +600,7 @@
             </div>
             <div class="form-group">
               <div class="row-title">
-                <label>模型列表（逗号分隔）</label>
+                <label>已配模型（逗号分隔）</label>
                 <div class="mini-actions">
                   <button class="small-btn" id="newApiLoadChannelBtn" type="button">导入渠道模型</button>
                   <button class="danger-btn small-btn" id="newApiClearBtn" type="button">清空</button>
@@ -629,14 +639,18 @@
   </div>
 
   <script src="./cordova.js"></script>
-  <script src="./js/state.js"></script>
-  <script src="./js/utils.js"></script>
-  <script src="./js/api.js"></script>
-  <script src="./js/ui.js"></script>
-  <script src="./js/main.js"></script>
-  <script src="./js/newapi.js"></script>
-  <script src="./js/update.js"></script>
-  <script src="./js/token-query.js"></script>
-  <script src="./js/app.js"></script>
+  <script src="./scripts/app.constants.js"></script>
+  <script src="./scripts/app.utils.js"></script>
+  <script src="./scripts/app.api.js"></script>
+  <script src="./scripts/app.ui.js"></script>
+  <script src="./scripts/features/proxy.js"></script>
+  <script src="./scripts/features/batch.js"></script>
+  <script src="./scripts/features/models.js"></script>
+  <script src="./scripts/features/testing.js"></script>
+  <script src="./scripts/app.main.js"></script>
+  <script src="./scripts/features/model-naming.js"></script>
+  <script src="./scripts/features/app-update.js"></script>
+  <script src="./scripts/features/token-query.js"></script>
+  <script src="./scripts/app.bridge.js"></script>
 </body>
 </html>

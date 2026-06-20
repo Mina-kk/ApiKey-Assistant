@@ -40,6 +40,7 @@ function doHttpRequest(method, url, headers, body, timeoutMs, logNetwork) {
         }, "NativeHttp", "request", [method, url, JSON.stringify(headers || {}), body || "", timeoutMs || 60000]);
       } catch (e) {
         if (shouldLogNetwork && typeof addLog === "function") addLog("error", "NativeHttp invoke failed", e.message || String(e));
+        done(false, e);
       }
       return;
     }

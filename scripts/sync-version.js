@@ -41,10 +41,10 @@ write('config.xml', config);
 });
 
 // ---- 4. 更新 www 源码中的版本号 ----
-if (exists('www/js/update.js')) {
-  var s = read('www/js/update.js');
+if (exists('www/scripts/features/app-update.js')) {
+  var s = read('www/scripts/features/app-update.js');
   s = s.replace(/var APP_CURRENT_VERSION = "[^"]+";/, 'var APP_CURRENT_VERSION = "' + version + '";');
-  write('www/js/update.js', s);
+  write('www/scripts/features/app-update.js', s);
 }
 
 if (exists('www/index.html')) {

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.apikey.gg.app" version="3.0.6" android-versionCode="30006" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.apikey.gg.app" version="3.0.61" android-versionCode="30061" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>ApiKey助手</name>
     <description>API Key 记录管理工具</description>
     <author email="dev@example.com" href="https://github.com/QuantumNous/new-api">by：呱呱⚀⚁⚂⚄⚅Hello World</author>

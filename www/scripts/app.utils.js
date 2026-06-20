@@ -427,18 +427,22 @@ function saveLogs(arr) {
 function shouldKeepRuntimeLog(level, message) {
   message = String(message || "");
 
-  // 运行日志白名单：初始化、模型获取与全局错误。
-  if (message === "app initialized") return true;
-  if (message === "fetchUpstreamModels") return true;
-  if (message === "model raw response") return true;
-  if (message === "models fetched") return true;
-  if (message === "fetchUpstreamModels failed") return true;
-  if (message === "parse model list failed") return true;
-  if (message === "window.error" || message === "unhandledrejection") return true;
-
-  // 模型获取过程的网络日志。
+  // 运行日志白名单：初始化、模型获取、网络请求与全局错误。
+  var keep = [
+    "app initialized",
+    "fetchUpstreamModels",
+    "model raw response",
+    "models fetched",
+    "fetchUpstreamModels failed",
+    "parse model list failed",
+    "window.error",
+    "unhandledrejection",
+    "NativeHttp invoke failed",
+    "proxy health ok",
+    "proxy health failed"
+  ];
+  if (keep.indexOf(message) !== -1) return true;
   if (/^HTTP request /.test(message)) return true;
-  if (message === "NativeHttp invoke failed") return true;
 
   return false;
 }

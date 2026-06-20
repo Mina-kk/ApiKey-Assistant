@@ -1,6 +1,6 @@
 {
   "name": "new-api-android",
-  "version": "3.0.6",
+  "version": "3.0.61",
   "description": "基于 QuantumNous/new-api 的移动端渠道管理工具（Cordova Android）",
   "main": "index.js",
   "scripts": {
