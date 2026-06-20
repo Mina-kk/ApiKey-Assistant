@@ -179,9 +179,12 @@ function renderCard(ch, keyword) {
       '<div class="info-block">' +
         '<div class="info-title-row">' +
           '<div class="info-label">Base URL</div>' +
-          '<button class="copy-mini-btn" data-action="copy-base" type="button">复制</button>' +
+          '<div class="card-actions btn-row">' +
+            '<button class="copy-mini-btn" data-action="toggle-baseurl" type="button">' + (AppState.baseUrlVisible[ch.id] ? "隐藏" : "显示") + '</button>' +
+            '<button class="copy-mini-btn" data-action="copy-base" type="button">复制</button>' +
+          '</div>' +
         '</div>' +
-        '<div class="mono-box">' + escapeHtml(ch.base_url) + '</div>' +
+        '<div class="mono-box">' + (AppState.baseUrlVisible[ch.id] ? escapeHtml(ch.base_url) : escapeHtml(maskBaseUrl(ch.base_url))) + '</div>' +
       '</div>' +
       '<div class="info-block">' +
         '<div class="info-label">API Key 列表</div>' +
@@ -213,8 +216,11 @@ function renderKeyItem(key) {
   return (
     '<div class="key-item">' +
       '<div class="key-name">' + escapeHtml(key.label || "Key") + '</div>' +
-      '<div class="key-value">' + escapeHtml(maskKey(key.value)) + '</div>' +
-      '<button class="copy-mini-btn" data-action="copy-key" data-key-id="' + escapeAttr(key.id) + '" type="button">复制</button>' +
+      '<div class="key-value">' + (AppState.keysVisible[key.id] ? escapeHtml(key.value) : escapeHtml(maskKey(key.value))) + '</div>' +
+      '<div class="key-item-actions">' +
+        '<button class="copy-mini-btn" data-action="toggle-key" data-key-id="' + escapeAttr(key.id) + '" type="button">' + (AppState.keysVisible[key.id] ? "隐藏" : "显示") + '</button>' +
+        '<button class="copy-mini-btn" data-action="copy-key" data-key-id="' + escapeAttr(key.id) + '" type="button">复制</button>' +
+      '</div>' +
     '</div>'
   );
 }

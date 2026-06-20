@@ -442,6 +442,17 @@ function handleCardAction(e) {
   }
 
   if (action === "copy-base") { copyText(ch.base_url, "Base URL 已复制"); return; }
+  if (action === "toggle-baseurl") {
+    AppState.baseUrlVisible[ch.id] = !AppState.baseUrlVisible[ch.id];
+    renderCards();
+    return;
+  }
+  if (action === "toggle-key") {
+    var kid = target.dataset.keyId;
+    AppState.keysVisible[kid] = !AppState.keysVisible[kid];
+    renderCards();
+    return;
+  }
 
   if (action === "copy-key") {
     var keyId = target.dataset.keyId;

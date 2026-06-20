@@ -4,7 +4,7 @@ var APP_REPO_URL = "https://github.com/Mina-kk/ApiKey-Assistant";
 var APP_RELEASES_URL = APP_REPO_URL + "/releases";
 var APP_LATEST_RELEASE_API = "https://api.github.com/repos/Mina-kk/ApiKey-Assistant/releases/latest";
 var APP_TAGS_API = "https://api.github.com/repos/Mina-kk/ApiKey-Assistant/tags";
-var APP_CURRENT_VERSION = "3.0.42";
+var APP_CURRENT_VERSION = "3.0.5";
 var latestUpdateInfo = null;
 var updateAutoCloseTimer = null;
 var updateAutoCloseLeft = 0;
@@ -20,6 +20,12 @@ function compareVersions(a, b) {
   for (var i = 0; i < len; i++) {
     var da = pa[i] || 0;
     var db = pb[i] || 0;
+    if (i >= 2) {
+      var aLen = String(da).length;
+      var bLen = String(db).length;
+      if (aLen < bLen) da = da * Math.pow(10, bLen - aLen);
+      else if (bLen < aLen) db = db * Math.pow(10, aLen - bLen);
+    }
     if (da > db) return 1;
     if (da < db) return -1;
   }

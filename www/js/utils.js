@@ -41,8 +41,17 @@ function escapeAttr(value) { return escapeHtml(value); }
 function maskKey(key) {
   key = String(key || "");
   if (!key) return "";
-  if (key.length <= 12) return "*".repeat(key.length);
-  return key.slice(0, 6) + "********" + key.slice(-6);
+  // 只显露 sk- 前缀，后面全隐藏
+  if (key.indexOf("sk-") === 0) {
+    return "sk-" + "*".repeat(Math.max(key.length - 3, 6));
+  }
+  return "*".repeat(key.length);
+}
+
+function maskBaseUrl(url) {
+  url = String(url || "");
+  if (!url) return "";
+  return "*".repeat(url.length);
 }
 
 function formatTime(ts) {

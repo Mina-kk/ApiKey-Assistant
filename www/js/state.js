@@ -234,6 +234,8 @@ var AppState = {
   editModels: [],
   editMappings: [],
   expandedModels: {},
+  baseUrlVisible: {},
+  keysVisible: {},
   selectedChannels: {},
   batchMode: false,
   currentGroup: "",
