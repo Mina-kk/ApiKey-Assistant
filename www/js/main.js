@@ -66,6 +66,7 @@ function bindEvents() {
   els.menuClearAllModelsBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); clearAllModels(); });
   els.menuFetchAllModelsBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); fetchAllModels(); });
   els.menuTestBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); openTestModal(); });
+  if (els.menuTokenQueryBtn) els.menuTokenQueryBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); if (typeof openTokenQueryModal === "function") openTokenQueryModal(); });
   if (els.menuUpdateBtn) els.menuUpdateBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); checkForUpdates(false); });
   if (els.menuAboutBtn) els.menuAboutBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); openAboutModal(); });
   if (els.menuLogBtn) els.menuLogBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); openLogModal(); });
@@ -244,8 +245,9 @@ function toggleMoreMenu() {
 }
 
 function toggleTheme() {
-  var themes = ["dark", "light", "auto"];
+  var themes = ["dark", "light"];
   var idx = themes.indexOf(AppState.settings.theme);
+  if (idx === -1) idx = 0;
   AppState.settings.theme = themes[(idx + 1) % themes.length];
   saveSettings();
   applyTheme();

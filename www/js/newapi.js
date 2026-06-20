@@ -9,7 +9,23 @@ function updateNewApiEntryVisibility() {
 function initNewApiEvents() {
   var els = AppState.els;
   updateNewApiEntryVisibility();
-  if (els.newApiEntryBtn) els.newApiEntryBtn.addEventListener("click", openNewApiModal);
+  if (els.newApiEntryBtn) els.newApiEntryBtn.addEventListener("click", toggleNewApiDropdown);
+  document.addEventListener("click", function (e) {
+    var dd = document.getElementById("newApiDropdown");
+    if (dd && !e.target.closest("#newApiEntryBtn") && !e.target.closest("#newApiDropdown")) {
+      dd.style.display = "none";
+    }
+  });
+  var namingBtn = document.getElementById("newApiModelNamingBtn");
+  if (namingBtn) namingBtn.addEventListener("click", function () {
+    document.getElementById("newApiDropdown").style.display = "none";
+    openNewApiModal();
+  });
+  var tqBtn = document.getElementById("newApiTokenQueryBtn");
+  if (tqBtn) tqBtn.addEventListener("click", function () {
+    document.getElementById("newApiDropdown").style.display = "none";
+    if (typeof openTokenQueryModal === "function") openTokenQueryModal();
+  });
   if (els.closeNewApiBtn) els.closeNewApiBtn.addEventListener("click", function () { closeModal(els.newApiModal); });
   if (els.newApiModal) els.newApiModal.addEventListener("click", function (e) { if (e.target === els.newApiModal) closeModal(els.newApiModal); });
   if (els.newApiEnabledInput) els.newApiEnabledInput.addEventListener("change", function () {
@@ -28,6 +44,18 @@ function initNewApiEvents() {
   if (els.newApiModelsInput) els.newApiModelsInput.addEventListener("keydown", function (e) {
     if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); generateNewApiNames(); }
   });
+}
+
+function toggleNewApiDropdown() {
+  var dd = document.getElementById("newApiDropdown");
+  if (!dd) return;
+  var btn = AppState.els.newApiEntryBtn;
+  if (!btn) return;
+  var rect = btn.getBoundingClientRect();
+  dd.style.display = dd.style.display === "flex" ? "none" : "flex";
+  dd.style.top = (rect.bottom + 4) + "px";
+  dd.style.right = (window.innerWidth - rect.right) + "px";
+  dd.style.left = "auto";
 }
 
 function openNewApiModal() {

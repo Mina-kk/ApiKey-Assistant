@@ -1,15 +1,16 @@
 {
   "name": "new-api-android",
-  "version": "3.0.0",
+  "version": "3.0.6",
   "description": "基于 QuantumNous/new-api 的移动端渠道管理工具（Cordova Android）",
   "main": "index.js",
   "scripts": {
-    "build": "cordova build android --release",
-    "build-debug": "cordova build android --debug",
-    "prepare": "cordova prepare android",
+    "build": "node scripts/sync-version.js && cordova build android --release",
+    "build-debug": "node scripts/sync-version.js && cordova build android --debug",
+    "prepare": "node scripts/sync-version.js",
     "platform-add": "cordova platform add android@13.0.0",
     "plugin-add": "cordova plugin add cordova-plugin-statusbar cordova-plugin-splashscreen cordova-plugin-file cordova-plugin-advanced-http cordova-plugin-clipboard cordova-plugin-device cordova-plugin-android-permissions",
-    "clean": "rm -rf platforms/android/app/build"
+    "clean": "rm -rf platforms/android/app/build",
+    "sync-version": "node scripts/sync-version.js"
   },
   "keywords": [
     "new-api",

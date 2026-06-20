@@ -12,7 +12,7 @@ function cacheElements() {
     "drawerMask", "drawer", "closeDrawerBtn", "groupList", "manageGroupsBtn",
     "moreMenu",
     "menuImportBtn", "menuExportBtn", "menuSettingsBtn", "menuSortBtn", "menuBatchBtn",
-    "menuClearAllModelsBtn", "menuFetchAllModelsBtn", "menuTestBtn", "menuUpdateBtn", "menuAboutBtn", "menuLogBtn",
+    "menuClearAllModelsBtn", "menuFetchAllModelsBtn", "menuTestBtn", "menuTokenQueryBtn", "menuUpdateBtn", "menuAboutBtn", "menuLogBtn",
     "editorModal", "editorTitle", "closeEditorBtn", "cancelEditorBtn", "saveChannelBtn",
     "editingId", "nameInput", "typeInput", "groupInput", "baseUrlInput", "copyBaseInEditorBtn", "modelFetchModeInput",
     "priorityInput", "weightInput", "statusInput", "tagInput", "remarkInput",
