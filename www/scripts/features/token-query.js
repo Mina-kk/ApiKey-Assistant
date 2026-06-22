@@ -318,7 +318,7 @@
     }
 
     els.resultArea.innerHTML = html;
-    if (chart && chart.dates.length) { buildFilter(); renderYAxis(); renderChart(); }
+    if (chart && chart.dates.length) { buildFilter(); renderYAxis(); renderChart(); renderLegend(); }
     if (logs.length) { renderLogCards(); }
   }
 
@@ -400,7 +400,8 @@
     var pad = { top: 20, right: 16, bottom: 36, left: 0 };
     var ph = CHART_HEIGHT - pad.top - pad.bottom;
     var n = chart.dates.length;
-    var totalW = n * (BAR_WIDTH + BAR_GAP) + BAR_GAP;
+    var leftPad = 16;
+    var totalW = leftPad + n * (BAR_WIDTH + BAR_GAP) + BAR_GAP;
     var w = Math.max(totalW, 200);
     var h = CHART_HEIGHT;
     canvas.width = w * dpr;
@@ -439,7 +440,7 @@
       s.data.forEach(function (val, di) {
         if (val <= 0) return;
         if (!stacks[di]) stacks[di] = 0;
-        var x = BAR_GAP + di * (BAR_WIDTH + BAR_GAP);
+        var x = leftPad + BAR_GAP + di * (BAR_WIDTH + BAR_GAP);
         var bh = (val / tickMax) * ph;
         var y = pad.top + ph - stacks[di] - bh;
         if (bh <= 0) return;
@@ -470,12 +471,12 @@
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     // 日期标签：确保最小间距避免重叠
-    var minGap = 50;
+    var minGap = 60;
     var labelInterval = Math.max(1, Math.ceil(minGap / (BAR_WIDTH + BAR_GAP)));
     chart.dates.forEach(function (label, i) {
       if (i % labelInterval !== 0) return;
-      var x = BAR_GAP + i * (BAR_WIDTH + BAR_GAP) + BAR_WIDTH / 2;
-      ctx.fillText(label, x, pad.top + ph + 6);
+      var x = leftPad + BAR_GAP + i * (BAR_WIDTH + BAR_GAP) + BAR_WIDTH / 2;
+      ctx.fillText(label, x, pad.top + ph + 8);
     });
   }
 
@@ -489,7 +490,7 @@
       var my = e.clientY - rect.top;
       var chart = queryState.chartData;
       if (!chart || !chart.dates.length) return;
-      var di = Math.round((mx - BAR_GAP) / (BAR_WIDTH + BAR_GAP));
+      var di = Math.round((mx - leftPad - BAR_GAP) / (BAR_WIDTH + BAR_GAP));
       if (di < 0 || di >= chart.dates.length) return;
 
       // 渲染过程中保存的分段位置信息

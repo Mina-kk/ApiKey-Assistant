@@ -85,9 +85,9 @@ input, select, textarea { font-size: 16px; }
   z-index: 50;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   height: var(--app-bar-height);
-  padding: 0 12px;
+  padding: 0 16px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(14px);
@@ -142,8 +142,8 @@ input, select, textarea { font-size: 16px; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 8px 14px;
+  gap: 10px;
+  padding: 10px 16px;
   background: rgba(251, 191, 36, 0.14);
   border-bottom: 1px solid rgba(251, 191, 36, 0.25);
   color: var(--warning);
@@ -167,8 +167,8 @@ input, select, textarea { font-size: 16px; }
 .search-panel {
   display: none;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
+  gap: 10px;
+  padding: 12px 16px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
@@ -189,8 +189,8 @@ input, select, textarea { font-size: 16px; }
 .stats-line {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  padding: 12px 14px;
+  gap: 10px;
+  padding: 14px 16px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
@@ -217,7 +217,7 @@ input, select, textarea { font-size: 16px; }
 .batch-bar {
   display: none;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
@@ -230,7 +230,7 @@ input, select, textarea { font-size: 16px; }
 .batch-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 13px;
   color: var(--text-secondary);
 }
@@ -238,7 +238,7 @@ input, select, textarea { font-size: 16px; }
 .batch-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 /* 卡片容器 */
@@ -260,7 +260,7 @@ input, select, textarea { font-size: 16px; }
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 14px;
+  padding: 16px;
   box-shadow: var(--shadow);
   transition: transform 0.12s, box-shadow 0.12s;
 }
@@ -286,9 +286,9 @@ input, select, textarea { font-size: 16px; }
 .card-head {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 12px;
-  padding-left: 26px;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-left: 28px;
 }
 
 .card-title h3 {
@@ -332,7 +332,7 @@ input, select, textarea { font-size: 16px; }
   gap: 6px;
 }
 
-.info-block { margin-top: 12px; }
+.info-block { margin-top: 14px; }
 .info-title-row {
   display: flex;
   justify-content: space-between;
@@ -361,12 +361,12 @@ input, select, textarea { font-size: 16px; }
   overflow-wrap: anywhere;
 }
 
-.key-list { display: grid; gap: 8px; }
+.key-list { display: grid; gap: 10px; }
 
 .key-item {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
   background: var(--panel-2);
   border: 1px solid var(--border);
@@ -455,9 +455,9 @@ input, select, textarea { font-size: 16px; }
 .card-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 12px;
-  padding-top: 10px;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid var(--border);
   font-size: 11px;
   color: var(--text-secondary);
@@ -466,12 +466,12 @@ input, select, textarea { font-size: 16px; }
 .card-bottom-actions {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 12px;
+  gap: 10px;
+  margin-top: 14px;
 }
 
 .card-bottom-actions button {
-  padding: 9px 4px;
+  padding: 10px 6px;
   font-size: 12px;
   border-radius: var(--radius-sm);
   width: 100%;
@@ -563,7 +563,7 @@ input, select, textarea { font-size: 16px; }
 
 .drawer-body { padding: 10px; overflow-y: auto; flex: 1; }
 
-.group-list { display: grid; gap: 6px; }
+.group-list { display: grid; gap: 8px; }
 
 .group-item {
   display: flex;
@@ -659,9 +659,9 @@ input, select, textarea { font-size: 16px; }
 }
 
 .modal-header, .modal-footer {
-  padding: 12px 16px;
+  padding: 14px 18px;
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
 }
 
@@ -681,7 +681,7 @@ input, select, textarea { font-size: 16px; }
 .modal-body {
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 16px;
+  padding: 18px;
   flex: 1;
 }
 
@@ -701,7 +701,7 @@ input, select, textarea { font-size: 16px; }
   letter-spacing: 0.5px;
 }
 
-.form-group { margin-bottom: 14px; }
+.form-group { margin-bottom: 16px; }
 
 .form-group label { display: block; margin-bottom: 6px; }
 
@@ -745,11 +745,11 @@ textarea { resize: vertical; }
 .key-row {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 7px;
+  gap: 8px;
   border: 1px solid var(--border);
   background: var(--panel-2);
   border-radius: var(--radius-sm);
-  padding: 8px;
+  padding: 10px;
 }
 
 @media (min-width: 600px) {
@@ -761,14 +761,14 @@ textarea { resize: vertical; }
 .model-edit-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .model-edit-item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   max-width: 100%;
   background: rgba(56, 189, 248, 0.12);
   color: var(--primary);
@@ -892,7 +892,7 @@ input:checked + .slider:before {
 }
 
 .sort-option {
-  padding: 12px;
+  padding: 14px;
   text-align: left;
   border: 1px solid var(--border);
   background: var(--panel);
@@ -909,7 +909,7 @@ input:checked + .slider:before {
 .mapping-row {
   display: grid;
   grid-template-columns: 1fr 1fr auto;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
 }
 
@@ -927,7 +927,7 @@ input:checked + .slider:before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 12px;
+  padding: 12px 14px;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -1451,13 +1451,14 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 .tq-log-actions {
   display: flex;
-  gap: 6px;
+  gap: 10px;
   flex-shrink: 0;
+  margin-left: 12px;
 }
 .tq-pagination {
   display: flex;
@@ -1634,6 +1635,7 @@ input:checked + .slider:before {
   flex-wrap: wrap;
   gap: 8px 16px;
   margin-top: 10px;
+  margin-bottom: 16px;
   padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
