@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: http: data: blob:; connect-src 'self' https: http:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; media-src 'self' blob:;" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https: http: data: blob:; connect-src 'self' https: http:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; media-src 'self' blob:;" />
   <meta name="theme-color" content="#070812" />
   <meta name="color-scheme" content="dark" />
   <title>ApiKey助手</title>
@@ -29,6 +29,7 @@
         <div class="dropdown-menu" id="newApiDropdown" style="display:none">
           <button class="menu-item" id="newApiModelNamingBtn" type="button">📝 模型重命名</button>
           <button class="menu-item" id="newApiTokenQueryBtn" type="button">📊 用量监控</button>
+          <button class="menu-item" id="newApiOpCodeGoBtn" type="button">🪙 OpCode Go 看板</button>
         </div>
         <button class="icon-btn" id="moreBtn" type="button" aria-label="更多">⋮</button>
       </div>
@@ -330,6 +331,55 @@
       </div>
     </div>
 
+    <!-- OpCode Go 套餐额度看板弹窗 -->
+    <div class="modal-mask" id="opCodeGoModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>📊 OpCode Go 套餐额度看板</h2>
+          <button class="icon-btn close-btn" id="ocgCloseBtn" type="button">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="tip-box">查询 OpenCode Go 订阅额度。每行一个 auth cookie，支持多账号。Workspace ID 留空自动发现所有工作区。</div>
+          <div class="ocg-cred-row">
+            <button class="small-btn" id="ocgSaveCredBtn" type="button">💾 保存</button>
+            <button class="small-btn" id="ocgImportCredBtn" type="button">📥 导入选中到账号池</button>
+            <button class="small-btn" id="ocgSelectAllCredBtn" type="button">全选/取消</button>
+          </div>
+          <div class="ocg-cred-list" id="ocgCredList">
+            <div class="ocg-cred-empty">暂无已保存凭据</div>
+          </div>
+          <small class="field-help" style="margin:0 0 8px 0;display:block">双击名称可重命名</small>
+          <div class="ocg-input-col">
+            <div class="form-group">
+              <label>Workspace ID（留空自动发现所有工作区）</label>
+              <input id="ocgWorkspaceInput" type="text" placeholder="留空自动发现，或填 wrk_xxxxx" />
+              <small class="field-help">留空自动发现所有工作区，或填指定的 wrk_xxxxx。</small>
+            </div>
+            <div class="form-group">
+              <div class="ocg-pool-label-row">
+                <label>Auth Cookie 账号池 <span>*</span></label>
+                <span class="ocg-pool-hint">一行一个，支持多账号</span>
+                <button class="small-btn" id="ocgPoolToggleBtn" type="button">👁 显示</button>
+                <button class="danger-btn small-btn" id="ocgClearPoolBtn" type="button">清空</button>
+              </div>
+              <textarea id="ocgCookieInput" rows="4" wrap="off" placeholder="一行一个 auth cookie&#10;支持多账号同时查询"></textarea>
+              <small class="field-help">取法：浏览器登录 opencode.ai → F12 → Application → Cookies → opencode.ai → 复制 auth 的值。</small>
+            </div>
+          </div>
+
+          <div class="ocg-query-actions">
+            <button class="primary-btn" id="ocgQueryBtn" type="button">🔍 查询</button>
+          </div>
+          <div id="ocgResultArea" class="ocg-result-area">
+            <div class="ocg-placeholder">填写凭据后点击「查询」查看三级额度进度。</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="ghost-btn" id="ocgCloseFooterBtn" type="button">关闭</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 测试弹窗 -->
     <div class="modal-mask" id="testModal">
       <div class="modal">
@@ -436,8 +486,8 @@
           </div>
           <div class="form-group switch-row">
             <div>
-              <label>NewAPI 功能</label>
-              <p class="setting-desc">开启后顶部导航栏显示 NewAPI 工具入口（模型重命名 + 用量监控）。</p>
+              <label>工具箱</label>
+              <p class="setting-desc">模型重命名、用量监控、OpCode Go 额度看板。</p>
             </div>
             <label class="switch">
               <input id="newApiEnabledInput" type="checkbox" />
@@ -542,7 +592,7 @@
         <div class="modal-body about-body">
           <div class="about-hero">
             <strong>ApiKey助手</strong>
-            <span id="aboutVersionText">当前版本：3.0.61</span>
+            <span id="aboutVersionText">当前版本：3.0.7</span>
           </div>
           <div class="form-section">
             <h3>软件功能</h3>
@@ -651,6 +701,7 @@
   <script src="./scripts/features/model-naming.js"></script>
   <script src="./scripts/features/app-update.js"></script>
   <script src="./scripts/features/token-query.js"></script>
+  <script src="./scripts/features/opcode-go-usage.js"></script>
   <script src="./scripts/app.bridge.js"></script>
 </body>
 </html>

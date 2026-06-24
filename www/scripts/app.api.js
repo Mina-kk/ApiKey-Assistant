@@ -55,21 +55,6 @@ function doHttpRequest(method, url, headers, body, timeoutMs, logNetwork) {
       return;
     }
 
-    if (window.cordova && cordova.plugin && cordova.plugin.http) {
-      var options = {
-        method: method,
-        headers: headers || {},
-        data: body || "",
-        responseType: "text",
-        timeout: timeoutMs || AppState.settings.timeout * 1000
-      };
-      cordova.plugin.http.sendRequest(url, options,
-        function (resp) { done(true, resp.data); },
-        function (resp) { done(false, new Error(resp.error || ("HTTP " + resp.status) || "HTTP failed")); }
-      );
-      return;
-    }
-
     var controller = new AbortController();
     var opts = { method: method, headers: headers || {}, signal: controller.signal };
     if (body) opts.body = body;
@@ -399,14 +384,6 @@ function getBatchModelFetchTimeoutMs() {
   var maxSeconds = Number(AppState.settings.timeout || 60) || 60;
   seconds = Math.max(5, Math.min(seconds, maxSeconds));
   return seconds * 1000;
-}
-
-function promiseWithTimeout(promise, timeoutMs, message) {
-  var timer = null;
-  return new Promise(function (resolve, reject) {
-    timer = setTimeout(function () { reject(new Error(message || "请求超时")); }, timeoutMs);
-    promise.then(resolve).catch(reject).finally(function () { if (timer) clearTimeout(timer); });
-  });
 }
 
 // 批量并发

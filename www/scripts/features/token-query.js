@@ -24,63 +24,7 @@
 
   // ========== HTTP 请求（复用项目现有能力）==========
   function doTokenQuery(method, url, headers, body, timeoutMs) {
-    if (typeof requestViaLocalProxyOrDirect === 'function') {
-      return requestViaLocalProxyOrDirect(method, url, headers, body, timeoutMs, true, false);
-    }
-    return new Promise(function (resolve, reject) {
-      var finished = false;
-      var timer = null;
-
-      function done(ok, value) {
-        if (finished) return;
-        finished = true;
-        if (timer) clearTimeout(timer);
-        ok ? resolve(value) : reject(value);
-      }
-
-      if (timeoutMs && timeoutMs > 0) {
-        timer = setTimeout(function () { done(false, new Error('请求超时')); }, timeoutMs);
-      }
-
-      if (window.AndroidBridge && typeof window.AndroidBridge.httpRequest === 'function') {
-        try {
-          var nativeRaw = window.AndroidBridge.httpRequest(method, url, JSON.stringify(headers || {}), body || '');
-          var nativeResp = JSON.parse(nativeRaw || '{}');
-          if (nativeResp.ok) done(true, nativeResp.body || '');
-          else done(false, new Error('Native HTTP ' + (nativeResp.status || 0) + ' ' + (nativeResp.error || nativeResp.body || '')));
-        } catch (e) { done(false, e); }
-        return;
-      }
-
-      if (window.cordova && typeof cordova.exec === 'function') {
-        try {
-          cordova.exec(function (nativeResp) {
-            try {
-              if (typeof nativeResp === 'string') nativeResp = JSON.parse(nativeResp || '{}');
-              if (nativeResp.ok) done(true, nativeResp.body || '');
-              else done(false, new Error('NativeHttp ' + (nativeResp.status || 0) + ' ' + (nativeResp.error || nativeResp.body || '')));
-            } catch (e) { done(false, e); }
-          }, function (err) {
-            var msg = typeof err === 'string' ? err : JSON.stringify(err || {});
-            done(false, new Error('NativeHttp plugin failed: ' + msg));
-          }, 'NativeHttp', 'request', [method, url, JSON.stringify(headers || {}), body || '', timeoutMs || 30000]);
-        } catch (e) { done(false, e); }
-        return;
-      }
-
-      var controller = new AbortController();
-      var opts = { method: method, headers: headers || {}, signal: controller.signal };
-      if (body) opts.body = body;
-      if (timeoutMs && timeoutMs > 0) setTimeout(function () { try { controller.abort(); } catch (e) {} }, timeoutMs);
-
-      fetch(url, opts)
-        .then(function (r) {
-          if (!r.ok) throw new Error('HTTP ' + r.status);
-          return r.text();
-        })
-        .then(function (text) { done(true, text); })
-        .catch(function (e) { done(false, e); });
-    });
+    return requestViaLocalProxyOrDirect(method, url, headers, body, timeoutMs, true, false);
   }
 
   // ========== 端点管理 ==========

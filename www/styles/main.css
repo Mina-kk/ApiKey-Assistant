@@ -1852,3 +1852,60 @@ input:checked + .slider:before {
   flex-shrink: 0;
   white-space: nowrap;
 }
+
+/* ===== OpCode Go 套餐额度看板 ===== */
+.ocg-cred-row { display:flex; gap:10px; align-items:flex-end; margin-bottom:10px; flex-wrap:wrap; }
+.ocg-input-row { display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+.ocg-input-row > .form-group { flex:1; min-width:0; }
+.ocg-query-actions { display:flex; gap:8px; margin:12px 0; flex-wrap:wrap; }
+.ocg-result-area { margin-top:12px; }
+.ocg-placeholder { color: var(--text-secondary); font-size:13px; padding:24px; text-align:center; border:1px dashed var(--border); border-radius:12px; }
+.ocg-loading { text-align:center; padding:32px; color: var(--text-secondary); }
+.ocg-error { text-align:center; padding:24px; }
+.ocg-error-icon { font-size:28px; margin-bottom:8px; }
+.ocg-error-text { color: var(--danger); font-size:14px; font-weight:600; margin-bottom:8px; }
+.ocg-error-hint { color: var(--text-secondary); font-size:12px; line-height:1.6; }
+.ocg-progress-card { background: var(--surface-variant); border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin-bottom:12px; }
+.ocg-progress-card.ocg-warning { border-color: var(--warning); }
+.ocg-progress-card.ocg-danger { border-color: var(--danger); }
+.ocg-progress-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.ocg-progress-name { font-size:13px; font-weight:600; color: var(--text); }
+.ocg-progress-pct { font-size:16px; font-weight:700; color: var(--primary); }
+.ocg-progress-card.ocg-warning .ocg-progress-pct { color: var(--warning); }
+.ocg-progress-card.ocg-danger .ocg-progress-pct { color: var(--danger); }
+.ocg-progress-track { height:10px; background: rgba(148,163,184,0.15); border-radius:5px; overflow:hidden; }
+.ocg-progress-bar { height:100%; border-radius:5px; background: linear-gradient(90deg, var(--primary), var(--primary-2)); transition: width .4s ease; }
+.ocg-progress-card.ocg-warning .ocg-progress-bar { background: linear-gradient(90deg, var(--warning), #f59e0b); }
+.ocg-progress-card.ocg-danger .ocg-progress-bar { background: linear-gradient(90deg, var(--danger), #e11d48); }
+.ocg-progress-meta { display:flex; justify-content:space-between; margin-top:8px; font-size:12px; color: var(--text-secondary); }
+.ocg-refresh-meta { text-align:right; font-size:11px; color: var(--text-secondary); margin-top:4px; opacity:.7; }
+
+/* 多账号账号池分组 */
+.ocg-account-block { border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:14px; background:var(--surface); }
+.ocg-account-header { font-size:14px; font-weight:600; color:var(--primary); margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.ocg-account-error { color:var(--danger); font-size:13px; padding:8px 0; }
+
+/* 账号分页 */
+.ocg-pagination { display:flex; align-items:center; justify-content:center; gap:12px; margin:8px 0; padding:8px; }
+.ocg-pagination .small-btn:disabled { opacity:.4; }
+.ocg-page-info { font-size:13px; color:var(--text-secondary); white-space:nowrap; }
+
+.ocg-pool-label-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+
+/* 凭据列表 */
+.ocg-cred-list { max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:10px; padding:6px; margin-bottom:10px; background:var(--surface-variant); }
+.ocg-cred-item { display:flex; align-items:center; justify-content:space-between; padding:6px 4px; }
+.ocg-cred-item + .ocg-cred-item { border-top:1px solid var(--border); }
+.ocg-cred-check { display:flex; align-items:center; gap:8px; cursor:pointer; flex:1; min-width:0; }
+.ocg-cred-checkbox { flex-shrink:0; }
+.ocg-cred-label { font-size:13px; }
+.ocg-cred-empty { color:var(--text-secondary); font-size:13px; text-align:center; padding:12px; }
+.ocg-cred-del-btn { flex-shrink:0; }
+
+/* 输入区上下排列 */
+.ocg-input-col { display:flex; flex-direction:column; gap:10px; }
+.ocg-input-col .form-group { width:100%; }
+.ocg-pool-hint { font-size:12px; color:var(--text-secondary); }
+
+/* 查询按钮加宽 */
+.ocg-query-actions .primary-btn { width:100%; }

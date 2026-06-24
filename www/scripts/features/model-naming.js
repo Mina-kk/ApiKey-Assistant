@@ -26,6 +26,17 @@ function initNewApiEvents() {
     document.getElementById("newApiDropdown").style.display = "none";
     if (typeof openTokenQueryModal === "function") openTokenQueryModal();
   });
+  var ocgBtn = document.getElementById("newApiOpCodeGoBtn");
+  if (ocgBtn) ocgBtn.addEventListener("click", function () {
+    document.getElementById("newApiDropdown").style.display = "none";
+    try {
+      if (typeof openOpCodeGoModal === "function") openOpCodeGoModal();
+      else if (window.openOpCodeGoModal) window.openOpCodeGoModal();
+      else window.showToast("OpCode Go 看板未就绪，请稍后再试", "warning");
+    } catch (e) {
+      window.showToast("打开看板失败：" + (e.message || e), "error");
+    }
+  });
   if (els.closeNewApiBtn) els.closeNewApiBtn.addEventListener("click", function () { closeModal(els.newApiModal); });
   if (els.newApiModal) els.newApiModal.addEventListener("click", function (e) { if (e.target === els.newApiModal) closeModal(els.newApiModal); });
   if (els.newApiEnabledInput) els.newApiEnabledInput.addEventListener("change", function () {
@@ -72,7 +83,7 @@ function populateNewApiChannelSelect() {
   });
   sel.innerHTML = channels.length
     ? channels.map(function (ch) {
-        var count = uniqueArray(ch.models || []).length;
+        var count = ch.models ? ch.models.length : 0;
         var text = (ch.name || "未命名渠道") + " / " + (ch.group || "default") + " / " + count + " 模型";
         return '<option value="' + escapeAttr(ch.id) + '">' + escapeHtml(text) + '</option>';
       }).join("")
@@ -85,7 +96,7 @@ function parseNewApiModels(text) {
 
 function getModelsByChannel(channelId) {
   var ch = AppState.channels.find(function (item) { return item.id === channelId; });
-  return ch ? uniqueArray(ch.models || []) : [];
+  return ch && ch.models ? ch.models : [];
 }
 
 function clearNewApiModelsOnly() {

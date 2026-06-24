@@ -207,6 +207,12 @@ window.updateStatusBarColor = updateStatusBarColor;
     openTokenQueryModal: window.openTokenQueryModal
   };
 
+  // opcode-go-usage.js
+  ns.opcodeGo = {
+    initOpCodeGo: window.initOpCodeGo,
+    openOpCodeGoModal: window.openOpCodeGoModal
+  };
+
   // app.js
   ns.app = {
     onDeviceReady: window.onDeviceReady,

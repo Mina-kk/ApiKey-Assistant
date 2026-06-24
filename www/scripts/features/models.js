@@ -18,7 +18,7 @@ function buildFetchModelsTasks(channels) {
   return channels.map(function (ch) {
     return function () {
       if (!getChannelFirstKey(ch)) return Promise.reject(new Error("无 Key"));
-      var oldCount = uniqueArray(ch.models || []).length;
+      var oldCount = ch.models ? ch.models.length : 0;
       return fetchUpstreamModels(ch, { timeoutMs: timeoutMs }).then(function (models) {
         ch.models = uniqueArray((ch.models || []).concat(models));
         ch.updated_time = Date.now();

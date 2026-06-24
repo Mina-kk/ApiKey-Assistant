@@ -26,6 +26,7 @@ new-api-android/
 │   │   └── features/         # 功能模块
 │   │       ├── models.js       # 模型管理
 │   │       ├── model-naming.js # NewAPI 模型命名工具
+│   │       ├── opcode-go-usage.js  # OpCode Go 套餐额度看板
 │   │       ├── batch.js        # 批量操作
 │   │       ├── token-query.js  # 令牌查询
 │   │       ├── proxy.js        # 本地代理
@@ -53,6 +54,7 @@ new-api-android/
 - 导入 / 导出 JSON 数据。
 - 主题切换、搜索、排序、批量操作。
 - 可选 NewAPI 模型命名工具入口。
+- 🪙 **OpCode Go 套餐额度看板** — 查询 OpenCode Go 订阅的三级额度（Rolling/Weekly/Monthly），支持多账号、多 Workspace。
 
 ## NewAPI 模型命名工具
 
@@ -96,6 +98,31 @@ NewAPI 工具用于把当前 app 内渠道模型转换为 NewAPI 常用的模型
 }
 ```
 
+## OpCode Go 套餐额度看板
+
+针对 https://opencode.ai/zen/go/v1 订阅，展示 Rolling/Weekly/Monthly 三级额度。
+
+### 入口
+
+路径：`更多菜单 → OpCode Go 看板`
+
+### 使用说明
+
+1. **Auth Cookie** — 输入 opencode.ai 的登录 cookie（每行一个，支持多账号）。
+2. **Workspace ID** — 可选。留空则自动发现所有工作区并轮询各 workspace 额度。
+3. 点击「查询」获取三级额度进度条（Rolling / Weekly / Monthly）。
+
+### 连接方式
+
+- **主路径**：直连 opencode 内部 RPC（`/_server` + Seroval + auth cookie），自动发现 workspace。
+- **回退**：HTML dashboard 抓取。
+
+### 数据
+
+- 凭据保存在 `localStorage`（`ocg_saved_creds_v1`）。
+- 用量缓存 `ocg_usage_cache_v2`，30 秒自动刷新。
+- 支持自动轮询（间隔 5 秒）。
+
 ## 网络与日志说明
 
 - 获取模型和渠道测试共用 HTTP 请求逻辑。直连失败且本地代理可用时，会尝试通过 `AppState.settings.localProxyUrl` 访问目标接口。
@@ -114,6 +141,8 @@ NewAPI 工具用于把当前 app 内渠道模型转换为 NewAPI 常用的模型
 | 主题数据 | `new_api_theme_v3` |
 | 分组数据 | `new_api_groups_v3` |
 | 运行日志 | `new_api_runtime_logs_v1`，最多保留最近 30 条 |
+| OpCode Go 凭据 | `ocg_saved_creds_v1` |
+| OpCode Go 用量缓存 | `ocg_usage_cache_v2`，30 秒 TTL |
 
 ## 维护说明
 
@@ -133,9 +162,18 @@ NewAPI 工具用于把当前 app 内渠道模型转换为 NewAPI 常用的模型
 4. Android 返回键如需关闭该弹窗，也要在 `www/scripts/app.bridge.js` 的弹窗列表中加入 ID。
 5. 复杂功能建议单独放在 `www/scripts/features/<feature>.js`，并在 `index.html` 中于 `app.main.js` 后引入。
 
+### 新增功能模块
+
+1. 在 `www/scripts/features/` 下创建功能文件，使用 IIFE 包裹。
+2. 在 `www/index.html` 底部引入 `<script src="./scripts/features/<feature>.js">`。
+3. 在 `www/scripts/app.ui.js` 的 `MoreMenuItems` 中添加菜单入口。
+4. 在 `www/index.html` 中添加对应弹窗 `.modal-mask` 结构。
+5. 在 `www/scripts/app.constants.js` 中添加功能相关常量。
+6. 在 `www/scripts/app.utils.js` 的 `closeAllModals()` 中注册弹窗 ID。
+
 ### 样式约定
 
-- 样式文件位于 `www/styles/main.css`，使用 CSS 变量：`--bg`、`--surface`、`--panel`、`--border`、`--text`、`--primary` 等。
+- 样式位于 `www/styles/main.css`，使用 CSS 变量：`--bg`、`--surface`、`--panel`、`--border`、`--text`、`--primary` 等。
 - 复用现有按钮类：`primary-btn`、`ghost-btn`、`small-btn`、`danger-btn`。
 - 移动端布局优先，避免固定大宽度。
 - 文本可能很长的位置需要加：
@@ -159,8 +197,8 @@ white-space: nowrap;
 
 | 版本 | 日期 | 说明 |
 |------|------|------|
-| v4.0.0 | 2026-06-21 | **架构重构**：目录结构全面重组，JS 按职责拆分至 `www/scripts/` + `www/scripts/features/`，样式移至 `www/styles/`，图片移至 `www/images/`，移除 `res/`、`hooks/`、`merges/` 等旧目录 |
-| v3.0.6 | 2026-06-20 | 新增令牌查询功能、堆叠柱状图优化、URL 默认隐藏、模型调用记录表、图例点击划线隐藏、修复关于页版本显示 |
+| v3.0.7 | 2026-06-22 | 新增 OpCode Go 套餐额度看板、UI 间距优化、令牌查询图表修复 |
+| v3.0.61 | 2026-06-21 | 令牌查询图表渲染优化（leftPad、图例渲染）、CSS 间距微调 |
 | v3.0.5 | - | 优化与修复 |
 | v3.0.4 | - | 优化与修复 |
 | v3.0.3 | - | GitHub 最新成品版本 |

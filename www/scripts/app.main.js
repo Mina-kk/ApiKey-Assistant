@@ -66,7 +66,6 @@ function bindEvents() {
   els.menuClearAllModelsBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); clearAllModels(); });
   els.menuFetchAllModelsBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); fetchAllModels(); });
   els.menuTestBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); openTestModal(); });
-  if (els.menuTokenQueryBtn) els.menuTokenQueryBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); if (typeof openTokenQueryModal === "function") openTokenQueryModal(); });
   if (els.menuUpdateBtn) els.menuUpdateBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); checkForUpdates(false); });
   if (els.menuAboutBtn) els.menuAboutBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); openAboutModal(); });
   if (els.menuLogBtn) els.menuLogBtn.addEventListener("click", function () { els.moreMenu.classList.remove("active"); openLogModal(); });

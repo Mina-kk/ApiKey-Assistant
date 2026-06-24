@@ -205,13 +205,6 @@ function getChannelFirstKey(channel) {
   return keys[0] || "";
 }
 
-function getChannelKeyByIndex(channel, index) {
-  var keys = channel.keys && channel.keys.length ? channel.keys : parseChannelKeys(channel.key).map(function (v, i) {
-    return { id: createId(), label: "Key " + (i + 1), value: v };
-  });
-  return keys[index % keys.length];
-}
-
 function getChannelNextKey(channel) {
   var info = channel.channel_info || {};
   var mode = info.multi_key_mode || MultiKeyMode.Single;

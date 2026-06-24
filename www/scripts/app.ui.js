@@ -12,7 +12,7 @@ function cacheElements() {
     "drawerMask", "drawer", "closeDrawerBtn", "groupList", "manageGroupsBtn",
     "moreMenu",
     "menuImportBtn", "menuExportBtn", "menuSettingsBtn", "menuSortBtn", "menuBatchBtn",
-    "menuClearAllModelsBtn", "menuFetchAllModelsBtn", "menuTestBtn", "menuTokenQueryBtn", "menuUpdateBtn", "menuAboutBtn", "menuLogBtn",
+    "menuClearAllModelsBtn", "menuFetchAllModelsBtn", "menuTestBtn", "menuUpdateBtn", "menuAboutBtn", "menuLogBtn",
     "editorModal", "editorTitle", "closeEditorBtn", "cancelEditorBtn", "saveChannelBtn",
     "editingId", "nameInput", "typeInput", "groupInput", "baseUrlInput", "copyBaseInEditorBtn", "modelFetchModeInput",
     "priorityInput", "weightInput", "statusInput", "tagInput", "remarkInput",
@@ -51,7 +51,7 @@ function renderStats() {
   AppState.els.totalConfig.textContent = channels.length;
   AppState.els.totalGroups.textContent = AppState.groups.length;
   AppState.els.totalKeys.textContent = channels.reduce(function (sum, ch) { return sum + (ch.keys ? ch.keys.length : 0); }, 0);
-  AppState.els.totalModels.textContent = channels.reduce(function (sum, ch) { return sum + uniqueArray(ch.models).length; }, 0);
+  AppState.els.totalModels.textContent = channels.reduce(function (sum, ch) { return sum + (ch.models ? ch.models.length : 0); }, 0);
 }
 
 function renderDrawerGroups() {
@@ -89,7 +89,7 @@ function getFilteredChannels() {
     var provider = getProviderLabel(ch.type).toLowerCase();
     var group = String(ch.group || "").toLowerCase();
     var tag = String(ch.tag || "").toLowerCase();
-    var models = uniqueArray(ch.models || []);
+    var models = ch.models || [];
     return (
       name.indexOf(keyword) !== -1 ||
       baseUrl.indexOf(keyword) !== -1 ||
@@ -140,7 +140,7 @@ function renderCards() {
 
 function renderCard(ch, keyword) {
   var keys = ch.keys || [];
-  var models = uniqueArray(ch.models || []);
+  var models = ch.models || [];
   var providerLabel = getProviderLabel(ch.type);
   var disabledClass = ch.status === 0 ? "disabled" : "";
   var selectedClass = AppState.selectedChannels[ch.id] ? "selected" : "";
@@ -226,7 +226,7 @@ function renderKeyItem(key) {
 }
 
 function renderModelPills(ch, keyword) {
-  var models = uniqueArray(ch.models || []);
+  var models = ch.models || [];
   if (keyword) {
     var matching = models.filter(function (m) { return m.toLowerCase().indexOf(keyword) !== -1; });
     if (matching.length) models = matching;
@@ -463,7 +463,7 @@ function updateTestModelSelect() {
   }
   var channelId = keyValue.split("::")[0];
   var ch = AppState.channels.find(function (c) { return c.id === channelId; });
-  var models = uniqueArray(ch && ch.models ? ch.models : []);
+  var models = ch && ch.models ? ch.models : [];
   modelSelect.innerHTML = models.length
     ? models.map(function (m) { return '<option value="' + escapeAttr(m) + '">' + escapeHtml(m) + '</option>'; }).join("")
     : '<option value="">此渠道暂无模型</option>';
