@@ -1,3 +1,9 @@
+function getSelectedIds() {
+  return Object.keys(AppState.selectedChannels).filter(function (id) {
+    return AppState.selectedChannels[id];
+  });
+}
+
 function enableBatchMode() {
   AppState.batchMode = true;
   AppState.selectedChannels = {};
